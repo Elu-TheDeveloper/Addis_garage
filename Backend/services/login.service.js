@@ -14,7 +14,7 @@ async function logIn(employeeData) {
 
         const employee = await employeeService.getEmployeeByEmail(employeeData.employee_email);
 
-        if (!employee) {  // employee is null if not found
+        if (!employee) {  
             return {
                 status: "fail",
                 message: "Employee does not exist"
@@ -22,8 +22,8 @@ async function logIn(employeeData) {
         }
 
         const passwordMatch = await bcrypt.compare(
-            employeeData.employee_password,          // plaintext password from request
-            employee.employee_password_hashed       // hashed password from DB
+            employeeData.employee_password,          
+            employee.employee_password_hashed       
         );
 
         if (!passwordMatch) {
