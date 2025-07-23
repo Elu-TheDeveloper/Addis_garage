@@ -11,7 +11,7 @@ const dbConfig = {
 
 const pool = mysql.createPool(dbConfig);
 
-// This is a reusable wrapper for normal queries
+
 async function query(sql, params) {
   const [rows] = await pool.execute(sql, params);
   return rows;
@@ -19,5 +19,5 @@ async function query(sql, params) {
 
 module.exports = {
   query,
-  pool // ✅ Export raw pool
+  pool 
 };
