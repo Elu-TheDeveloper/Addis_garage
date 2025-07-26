@@ -1,51 +1,106 @@
 const loginService = require('../services/login.service');
-const jwt = require('jsonwebtoken');
+const jwt = require("jsonwebtoken");
+const { ERRORS } = require('../services/employee.service');
 const jwtSecret = process.env.JWT_SECRET;
 
-async function logIn(req, res, next) {
+if (!jwtSecret) {
+  throw new Error('JWT_SECRET is not defined in environment variables');
+}
+
+async function logIn(req, res) {
   try {
-    const employeeData = {
-      employee_email: req.body.employee_email || req.body.email,
-      employee_password: req.body.employee_password || req.body.password
-    };
+    console.log('Login request received:', {
+      body: req.body,
+      // headers: req.headers
+    });
 
-    console.log('Normalized employeeData:', employeeData);
+    // Handle both field naming conventions
+    const email = req.body.employee_email || req.body.email;
+    const password = req.body.employee_password || req.body.password;
 
-    const employee = await loginService.logIn(employeeData);
-
-    if (employee.status === 'fail') {
-      return res.status(403).json({
-        status: employee.status,
-        message: employee.message
+    // Validate input
+    if (!email?.trim() || !password?.trim()) {
+      console.log('Validation failed - missing fields:', {
+        email: !!email,
+        password: !!password,
+        rawBody: req.body
+      });
+      return res.status(400).json({
+        status: "fail",
+        message: "Email and password are required",
+        received_data: {
+          body: req.body,
+          headers: req.headers
+        }
       });
     }
 
-    console.log('JWT Secret:', jwtSecret);
-    if (!jwtSecret) {
-      throw new Error('JWT_SECRET is not defined!');
+    // Process login
+    const result = await loginService.logIn({ 
+      employee_email: email.trim(), 
+      employee_password: password.trim() 
+    });
+
+    if (result.status === "fail") {
+      console.log('Login failed:', result.message);
+      return res.status(result.statusCode || 401).json(result);
     }
 
+    const { employee } = result;
+    
+    // Create JWT payload
     const payload = {
-      employee_id: employee.data.employee_id,
-      employee_email: employee.data.employee_email,
-      employee_role: employee.data.company_role_id,
-      employee_first_name: employee.data.employee_first_name
+      employee_id: employee.employee_id,
+      employee_email: employee.employee_email,
+      employee_role: employee.company_role_id,
+      employee_first_name: employee.employee_first_name,
+      iss: process.env.APP_NAME || 'hr-system',
+      aud: process.env.CLIENT_ID || 'web-client'
     };
 
-    const token = jwt.sign(payload, jwtSecret, { expiresIn: '24h' });
-
-    res.status(200).json({
-      status: 'success',
-      message: 'Employee logged in successfully',
-      data: { employee_token: token }
+    // Generate token
+    const token = jwt.sign(payload, jwtSecret, {
+      expiresIn: "24h"
     });
+
+    // Set secure cookie
+    res.cookie('jwt', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 24 * 60 * 60 * 1000
+    });
+
+    // Successful response
+    console.log('Login successful for:', employee.employee_email);
+    return res.status(200).json({
+      status: "success",
+      message: "Login successful",
+      data: {
+        employee_token: token,
+        employee_id: employee.employee_id,
+        employee_email: employee.employee_email,
+        employee_first_name: employee.employee_first_name
+      }
+    });
+
   } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      status: 'fail',
-      message: 'Internal server error'
+    console.error('Login error:', {
+      message: error.message,
+      stack: error.stack,
+      body: req.body
+    });
+    return res.status(500).json({
+      status: "error",
+      message: "Internal server error",
+      ...(process.env.NODE_ENV === 'development' && { 
+        error: error.message,
+        stack: error.stack 
+      })
     });
   }
 }
 
-module.exports = { logIn };
+module.exports = {
+  logIn
+};
