@@ -1,6 +1,7 @@
 import logo from '../../../assets/images/logo.png'
-
+import { useAuth } from '../../../context/AuthContext'
 const Header = () => {
+    console.log(useAuth)
   return (
     <div>
  {/* <!-- Main Header --> */}

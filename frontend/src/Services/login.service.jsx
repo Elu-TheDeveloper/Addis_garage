@@ -6,7 +6,6 @@ const logIn = async (formData) => {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(formData),
   };
-
   const response = await fetch(`${api_url}/api/employee/login`, requestOptions);
   return response;
 };

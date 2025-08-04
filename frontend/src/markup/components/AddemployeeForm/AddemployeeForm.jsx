@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import employeeService from '../../../Services/employee.service.js'
+import employeeService from '../../../Services/employee.service'
 const Addemployee = () => {
 const[employee_email,setEmail]=useState('')
 const [employee_first_name, setFirstName]=useState('')

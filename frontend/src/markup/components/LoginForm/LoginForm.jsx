@@ -49,7 +49,7 @@ const LoginForm = () => {
         console.log(loginEmployee);
         loginEmployee.then((response) => response.json())
           .then((response) => {
-            console.log(response);
+            // console.log(response);
             if (response.status === 'success') {
               // Save the user in the local storage
               if (response.data.employee_token) {

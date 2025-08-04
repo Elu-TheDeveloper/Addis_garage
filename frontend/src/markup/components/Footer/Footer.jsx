@@ -126,7 +126,7 @@ const Footer = () => {
         </div>
         <div className="auto-container">
             <div className="footer-bottom">
-                <div className="copyright-text">© Copyright  <a href="#">Autorex</a> 2025 . All right reserved.</div>
+                <div className="copyright-text"> Copyright  <a href="#">Autorex</a> 2025 . All right reserved.</div>
                 <div className="text">Built by <a href="https://www.elacodes.com">Eliyas Daba</a></div>
             </div>
         </div>

@@ -1,7 +1,4 @@
 const api_url = import.meta.env.VITE_API_URL;
-
-
-
 const createEmployee =async (formData) => {
     const requestOptions ={
         method: 'POST',
