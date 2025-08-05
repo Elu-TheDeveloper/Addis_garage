@@ -1,7 +1,16 @@
 import logo from '../../../assets/images/logo.png'
-import { useAuth } from '../../../context/AuthContext'
+import {Link} from 'react-router-dom'
+import loginService from '../../../Services/login.service'
+import {useAuth} from '../../../context/AuthContext'
 const Header = () => {
-    console.log(useAuth)
+
+const {isLoggedin, setIsLogged, employee}=useAuth()
+
+//Logout Event handler
+const LogOut = () =>{
+loginService.LogOut()
+    setIsLogged(false)
+}
   return (
     <div>
  {/* <!-- Main Header --> */}
@@ -16,7 +25,20 @@ const Header = () => {
                         <div className="office-hour">Monday - Saturday 7:00AM - 6:00PM</div>
                     </div>
                     <div className="right-column">
-                        <div className="phone-number">Schedule Your Appontment Today : <strong>1800 456 7890</strong></div>
+
+                        <div className="right-column">
+                       {isLoggedin ? (
+  <div className="link-btn">
+
+    <div className="phone-number">
+      <strong>Welcome {employee?.employee_first_name}</strong>
+    </div>
+  </div>
+) : (
+   <div className="phone-number">Schedule Your Appontment Today : <strong>1800 456 7890</strong></div>
+)}
+                    </div>
+                       
                     </div>
                 </div>
             </div>
@@ -54,7 +76,18 @@ const Header = () => {
                             </nav>
                         </div>
                         <div className="search-btn"></div>
-                        <div className="link-btn"><a href="#" className="theme-btn btn-style-one">Login </a></div>
+                        {isLoggedin ?(
+                            <div className="Link-btn">
+                                <Link to ="/login" className='theme-btn
+                                btn-style-one blue
+                                btn-style-one blue' onClick={LogOut}>Logout</Link>
+                            </div>
+
+                        ):(
+                            <div className='Link-btn'>
+                                <Link to ="/login" className='theme-btn btn-style-one'>Login</Link>
+                            </div>
+                        )}
                     </div>                        
                 </div>
             </div>

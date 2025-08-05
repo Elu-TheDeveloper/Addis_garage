@@ -9,7 +9,9 @@ const logIn = async (formData) => {
   const response = await fetch(`${api_url}/api/employee/login`, requestOptions);
   return response;
 };
-
-const loginService = { logIn };
+const LogOut=()=>{
+localStorage.removeItem("employee");
+}
+const loginService = { logIn, LogOut };
 
 export default loginService;
