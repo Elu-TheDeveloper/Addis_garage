@@ -7,6 +7,7 @@ import "./assets/assets_from_template/css/bootstrap.css"
 import "./assets/assets_from_template/css/style.css"
 import "./assets/assets_from_template/css/responsive.css"
 import "./assets/assets_from_template/css/color.css"
+import Unauthorized from './markup/pages/Unauthorized'
 
 //Custom CSS
 import "./assets/styles/custom.css"
@@ -24,7 +25,9 @@ function App() {
   <Route path="/" element = {<Home/>}/>
   <Route path="/Login" element ={<Login/>}/>
   <Route path = "admin/add-employee" element ={<Addemployee/>}/>
+  <Route path="/unauthorized" element ={<Unauthorized/>}/>
 </Routes>
+
 <Footer/>
  </>
   )
