@@ -1,5 +1,7 @@
 import React, { useState } from 'react'
 import employeeService from '../../../Services/employee.service'
+
+import { useAuth } from '../../../context/AuthContext'
 const Addemployee = () => {
 const[employee_email,setEmail]=useState('')
 const [employee_first_name, setFirstName]=useState('')
@@ -14,6 +16,14 @@ const [firstNameRequired,setFirstNameRequired]=useState('')
 const [passwordError, setPasswordError]=useState('')
 const [success, setSuccess]=useState('false')
 const [serverError, setServerError]=useState('')
+
+
+  let loggedInEmployeeToken = '';
+  // Destructure the auth hook and get the token 
+  const { employee } = useAuth();
+  if (employee && employee.employee_token) {
+    loggedInEmployeeToken = employee.employee_token;
+  }
 
 const handleSubmit =(event)=>{
   event.preventDefault()
@@ -58,7 +68,8 @@ const handleSubmit =(event)=>{
       active_employee,
       company_role_id
     };
-    const newEmployee = employeeService.createEmployee(formData)
+    const newEmployee = employeeService.createEmployee(formData, loggedInEmployeeToken)
+     
     newEmployee.then((response) => response.json())
     .then((data)=>{
      

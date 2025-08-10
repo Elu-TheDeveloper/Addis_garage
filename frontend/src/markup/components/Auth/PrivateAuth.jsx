@@ -27,6 +27,6 @@ const PrivateAuthRoute =({roles, children})=>{
             return <Navigate to ="/unauthorized"/>
         }
     }
+    return children
 }
-
 export default PrivateAuthRoute;
