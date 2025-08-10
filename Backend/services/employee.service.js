@@ -34,12 +34,12 @@ const employeeValidationRules = [
   body('employee_first_name')
     .trim()
     .notEmpty().withMessage('First name is required')
-    .isAlpha('en-US', { ignore: ' -' }).withMessage('First name must contain only letters'),
+    .isAlpha('en-US', {ignore: ' -' }).withMessage('First name must contain only letters'),
   
   body('employee_last_name')
     .trim()
     .notEmpty().withMessage('Last name is required')
-    .isAlpha('en-US', { ignore: ' -' }).withMessage('Last name must contain only letters'),
+    .isAlpha('en-US', {ignore: ' -' }).withMessage('Last name must contain only letters'),
   
   body('employee_phone')
     .optional()
@@ -96,35 +96,28 @@ const checkIfCompanyRoleExists = async (roleId) => {
 };
 
 // Get employee by email
-const getEmployeeByEmail = async (email) => {
-  const connection = await pool.getConnection();
-  try {
-    const [rows] = await connection.query(
-      `SELECT 
-        e.employee_id,
-        e.employee_email,
-        e.active_employee,
-        ei.employee_first_name,
-        ei.employee_last_name,
-        ei.employee_phone,
-        er.company_role_id,
-        ep.employee_password_hashed
-       FROM employee e
-       JOIN employee_info ei ON e.employee_id = ei.employee_id
-       JOIN employee_role er ON e.employee_id = er.employee_id
-       JOIN employee_pass ep ON e.employee_id = ep.employee_id
-       WHERE LOWER(e.employee_email) = ?
-       LIMIT 1`,
-      [sanitizeInput(email?.toLowerCase())]
-    );
-    return rows[0] || null;
-  } catch (error) {
-    console.error(`Failed to fetch employee:`, error);
-    throw new Error(ERRORS.DB_FAILURE);
-  } finally {
-    connection.release();
-  }
-};
+async function getEmployeeByEmail(employee_email) {
+  const query = `
+    SELECT 
+      employee.employee_id,
+      employee.employee_email,
+      employee_info.employee_first_name,
+      employee_info.employee_last_name,
+      employee_pass.employee_password_hashed,
+      employee_role.company_role_id
+    FROM employee
+    INNER JOIN employee_info ON employee.employee_id = employee_info.employee_id
+    INNER JOIN employee_pass ON employee.employee_id = employee_pass.employee_id
+    INNER JOIN employee_role ON employee.employee_id = employee_role.employee_id
+    WHERE employee.employee_email = ?
+    LIMIT 1
+  `;
+
+  const [rows] = await pool.query(query, [employee_email]);
+  return rows.length > 0 ? rows[0] : null;
+}
+
+
 
 // Create new employee (transactional)
 const createEmployee = async (employeeData) => {

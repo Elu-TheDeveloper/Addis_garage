@@ -128,31 +128,10 @@ async function createEmployeeWithTransaction(employeeData) {
 }
 
 // Get employee by email with password hash and role info
-async function getEmployeeByEmail(email) {
-  try {
-    const sanitizedEmail = sanitize((email || '').toLowerCase());
-    const [rows] = await pool.query(
-      `SELECT 
-        e.employee_id, 
-        e.employee_email, 
-        e.active_employee,
-        ei.employee_first_name, 
-        ei.employee_last_name, 
-        ei.employee_phone,
-        er.company_role_id,
-        ep.employee_password_hashed
-      FROM employee e
-      LEFT JOIN employee_info ei ON e.employee_id = ei.employee_id
-      LEFT JOIN employee_role er ON e.employee_id = er.employee_id
-      LEFT JOIN employee_pass ep ON e.employee_id = ep.employee_id
-      WHERE LOWER(e.employee_email) = ? LIMIT 1`,
-      [sanitizedEmail]
-    );
-    return rows[0] || null;
-  } catch (error) {
-    console.error('Error in getEmployeeByEmail:', error);
-    throw error;
-  }
+async function getEmployeeByEmail(employee_email) {
+  const query = "SELECT * FROM employee INNER JOIN employee_info ON employee.employee_id = employee_info.employee_id INNER JOIN employee_pass ON employee.employee_id = employee_pass.employee_id INNER JOIN employee_role ON employee.employee_id = employee_role.employee_id WHERE employee.employee_email = ?";
+  const rows = await conn.query(query, [employee_email]);
+  return rows;
 }
 
 module.exports = {
