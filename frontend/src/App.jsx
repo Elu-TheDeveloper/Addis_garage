@@ -31,7 +31,7 @@ function App() {
   
   <Route path="/unauthorized" element ={<Unauthorized/>}/>
    <Route path="admin/employee" element ={<Employees/>}/>
-   <Route path="admin/add-employee" element ={<Addemployee/>}/>
+   {/* <Route path="admin/add-employee" element ={<Addemployee/>}/> */}
 <Route path="/admin/orders" element ={
   
   <PrivateAuthRoute roles ={[1,2,3]}>
@@ -39,12 +39,12 @@ function App() {
 <Orders/>
 </PrivateAuthRoute>
 } />
-{/* <Route path="/admin/add-employee" element ={
+<Route path="/admin/add-employee" element ={
   <PrivateAuthRoute roles ={[3]}>
 <Addemployee/>
 </PrivateAuthRoute>
 
-} /> */}
+} />
 <Route path="/admin/customer" element ={
   
   <PrivateAuthRoute roles ={[2,3]}>
