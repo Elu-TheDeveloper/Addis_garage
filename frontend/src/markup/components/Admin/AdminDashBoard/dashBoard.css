@@ -1,0 +1,48 @@
+.service-block-one {
+    margin-bottom: 15px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    /* background-color: white; */
+    /* border: 1px solid #dfe2ec; */
+    height: 300px;
+    position: relative;
+    gap: 10px;
+  }
+  
+  .inner-box {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    overflow: hidden;
+    position: relative; 
+  }
+  
+  .inner-box h2 {
+    font-size: 1.5em; 
+    margin-bottom: 10px;
+    white-space: nowrap; 
+  }
+  
+  .read-more {
+    position: absolute; 
+    bottom: 25px; 
+    left: 20px; 
+    margin-bottom: 0; 
+  }
+  
+  .icon {
+    position: absolute; 
+    bottom: 20px; 
+    right: 20px; 
+  }
+  
+  .inner-box h5 {
+    margin-bottom: 10px;
+  }
+  
+  .inner-box .text {
+    flex-grow: 1;
+  }

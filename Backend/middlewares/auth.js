@@ -8,7 +8,18 @@ const employeeService = require("../services/employee.service");
 
 // A function to verify the token received from the frontend 
 const verifyToken = async (req, res, next) => {
-  let token = req.headers["x-access-token"];
+  const authHeader = req.headers["authorization"];
+
+  if (!authHeader) {
+    return res.status(403).send({
+      status: "fail",
+      message: "No token provided!"
+    });
+  }
+
+  // Authorization header format: "Bearer tokenvalue"
+  const token = authHeader.split(' ')[1]; // split by space, take second part
+
   if (!token) {
     return res.status(403).send({
       status: "fail",
@@ -23,12 +34,12 @@ const verifyToken = async (req, res, next) => {
         message: "Unauthorized!"
       });
     }
-    // console.log("Here is the decoded token");
-    // console.log(decoded);
+
     req.employee_email = decoded.employee_email;
     next();
   });
 }
+
 
 // A function to check if the user is an admin
 const isAdmin = async (req, res, next) => {

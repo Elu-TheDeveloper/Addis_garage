@@ -11,6 +11,7 @@ const installRouter = require('./install.routes')
 const employeeRouter = require('./employee.routes')
 
 const loginRoutes =require('./login.routes')
+const customerRoute = require('./customer.routes')
 
 // Use installRouter for handling install-related routes
 router.use(installRouter)
@@ -18,5 +19,6 @@ router.use(installRouter)
 // Use employeeRouter for handling employee-related routes
 router.use(employeeRouter)
 router.use(loginRoutes)
+router.use(customerRoute)
 
 module.exports = router
