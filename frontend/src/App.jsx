@@ -4,7 +4,9 @@ import Home from './markup/pages/Home'
 import Login from './markup/pages/Login'
 import Addemployee from './markup/pages/admin/Addemployee'
 import Employees from './markup/pages/admin/Employees'
-import Customer from './markup/pages/admin/Customer'
+import Customer from "./markup/pages/admin/Customers/Customers"
+import CustomerForm from './markup/pages/admin/Customers/CustomerForm'
+import EditCustomer from './markup/components/Admin/CustomerForm/EditCustomer'
 import Orders from './markup/pages/admin/Orders'
 import PrivateAuthRoute from './markup/components/Auth/PrivateAuth'
 import "./assets/assets_from_template/css/bootstrap.css"
@@ -45,6 +47,26 @@ function App() {
 </PrivateAuthRoute>
 
 } />
+    <Route
+          path="/admin/customers"
+          element={
+            <PrivateAuthRoute roles={[1, 2, 3]}>
+              <Customer />
+            </PrivateAuthRoute>
+          }
+        />
+         <Route
+          path="/admin/edit-customer/:customerId"
+          element={<EditCustomer />}
+        />
+ <Route
+          path="/admin/add-customer"
+          element={
+            <PrivateAuthRoute roles={[1, 2, 3]}>
+              <CustomerForm />
+            </PrivateAuthRoute>
+          }
+        />
 <Route path="/admin/customer" element ={
   
   <PrivateAuthRoute roles ={[2,3]}>

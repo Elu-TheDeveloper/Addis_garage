@@ -1,6 +1,6 @@
 import React from "react";
 import AddCustomerForm from "../../../components/Admin/CustomerForm/CustomerForm";
-import AdminMenu from "../../AdminMenu/AdminMenu";
+import AdminMenu from "../../../components/AdminMenu/AdminMenu";
 
 function CustomerForm(props) {
   return (

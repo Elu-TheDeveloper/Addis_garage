@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import AdminMenu from "../AdminMenu/AdminMenu";
-import CustomerList from "../CustomerList/CustomerList";
+import AdminMenu from "../../../components/AdminMenu/AdminMenu";
+import CustomerList from "../../../components/Admin/CustomerList/CustomerList";
 
 function Customers() {
 

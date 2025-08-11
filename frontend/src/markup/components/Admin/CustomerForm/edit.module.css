@@ -1,0 +1,99 @@
+.contactSection {
+  /* text-align: center; */
+  padding: 20px;
+}
+
+.contactTitle {
+  margin-bottom: 20px;
+}
+
+.contactTitle h2 {
+  margin-bottom: 10px;
+}
+
+.contactDetails {
+  margin-bottom: 20px;
+}
+
+.contactName {
+  font-size: 1.5em;
+  font-weight: bold;
+}
+
+.contactEmail {
+  font-size: 1.2em;
+  color: #555;
+}
+
+.contactForm {
+  display: inline-block;
+  text-align: left;
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.formGroup {
+  margin-bottom: 15px;
+}
+
+.formInput {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  box-sizing: border-box;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.formCheckbox {
+  display: inline-block;
+  margin-right: 10px;
+}
+
+.formCheckboxLabel {
+  display: block;
+  margin-bottom: 5px;
+  cursor: pointer;
+}
+
+.themeBtn {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  background-color: rgb(239, 52, 52);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  text-align: center;
+  transition: background-color 0.3s ease;
+}
+
+.themeBtn:hover {
+  background-color: #0056b3;
+}
+
+.themeBtn span {
+  display: block;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .contactForm {
+    width: 100%;
+    padding: 10px;
+  }
+
+  .formGroup {
+    margin-bottom: 10px;
+  }
+
+  .formInput {
+    padding: 8px;
+  }
+
+  .themeBtn {
+    padding: 8px;
+  }
+}
