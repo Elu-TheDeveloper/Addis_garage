@@ -110,12 +110,14 @@ async function updateCustomerController(req, res, next) {
       updateResult,
     });
   } catch (error) {
-    console.error(error);
+    console.error("Update Customer Error:", error);
     return res.status(500).json({
       error: "Something went wrong!",
+      details: error.message,   // send error message for debugging
     });
   }
 }
+
 
 // Delete Customer controller
 async function deleteCustomerController(req, res, next) {
