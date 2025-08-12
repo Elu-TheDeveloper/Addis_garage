@@ -1,6 +1,6 @@
 import React from 'react'
-import AdminMenu from '../../components/AdminMenu/AdminMenu'
-import AddemployeeForm from '../../components/AddemployeeForm/AddemployeeForm'
+import AdminMenu from '../../../components/AdminMenu/AdminMenu'
+import AddemployeeForm from '../../../components/AddemployeeForm/AddemployeeForm'
 
 const Addemployee = () => {
 

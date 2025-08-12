@@ -1,6 +1,6 @@
 import React from 'react'
-import { useAuth } from '../../../context/AuthContext'
-import LoginForm from '../../components/LoginForm/LoginForm'
+import { useAuth } from '../../../../context/AuthContext'
+import LoginForm from '../../../components/LoginForm/LoginForm'
 const Employees = () => {
     const { isLoggedin, isAdmin } = useAuth();
     
