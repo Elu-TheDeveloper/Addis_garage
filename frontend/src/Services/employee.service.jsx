@@ -1,11 +1,11 @@
 const api_url = import.meta.env.VITE_API_URL;
 
-const createEmployee = async (formData, isLoggedinEmployeeToken) => {
+const createEmployee = async (formData, token) => {
   const requestOptions = {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'x-access-token': isLoggedinEmployeeToken
+      'Authorization': `Bearer ${token}`   // <-- Change here
     },
     body: JSON.stringify(formData),
   };

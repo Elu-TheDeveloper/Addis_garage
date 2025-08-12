@@ -1,66 +1,60 @@
-import React, { useState } from 'react'
-import employeeService from '../../../Services/employee.service'
-
-import { useAuth } from '../../../context/AuthContext' 
+import React, { useState } from 'react';
+import employeeService from '../../../Services/employee.service';
+import { useAuth } from '../../../context/AuthContext';
 
 const Addemployee = () => {
-const[employee_email,setEmail]=useState('')
-const [employee_first_name, setFirstName]=useState('')
-const [employee_last_name,setLastName]=useState('')
-const [employee_phone,setPhoneNumber]=useState('')
-const[employee_password,setPassword]=useState('')
-const[active_employee,setActive_employee]=useState(1)
-const[company_role_id,setCompany_role_id]=useState(1)
+  const [employee_email, setEmail] = useState('');
+  const [employee_first_name, setFirstName] = useState('');
+  const [employee_last_name, setLastName] = useState('');
+  const [employee_phone, setPhoneNumber] = useState('');
+  const [employee_password, setPassword] = useState('');
+  const [active_employee] = useState(1);
+  const [company_role_id, setCompany_role_id] = useState(1);
 
-const[emailError,setEmailError]=useState('')
-const [firstNameRequired,setFirstNameRequired]=useState('')
-const [passwordError, setPasswordError]=useState('')
-const [success, setSuccess]=useState(false)
-const [serverError, setServerError]=useState('')
-
+  const [emailError, setEmailError] = useState('');
+  const [firstNameRequired, setFirstNameRequired] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [success, setSuccess] = useState(false);
+  const [serverError, setServerError] = useState('');
 
   let loggedInEmployeeToken = '';
-  // Destructure the auth hook and get the token 
   const { employee } = useAuth();
   if (employee && employee.employee_token) {
     loggedInEmployeeToken = employee.employee_token;
   }
 
-const handleSubmit =(event)=>{
-  event.preventDefault()
+  const handleSubmit = async (event) => {
+    event.preventDefault();
 
-  //flag
-  let valid =true
-  if(!employee_first_name){
-  setFirstNameRequired('First name is required')
-  valid = false;
-  }else{
-    setFirstNameRequired('')
-  }
+    // Form validation
+    let valid = true;
+    if (!employee_first_name) {
+      setFirstNameRequired('First name is required');
+      valid = false;
+    } else {
+      setFirstNameRequired('');
+    }
 
-  // Email is required
     if (!employee_email) {
       setEmailError('Email is required');
       valid = false;
-    } else if (!employee_email.includes('@')) {
+    } else if (!/^\S+@\S+\.\S+$/.test(employee_email)) {
       setEmailError('Invalid email format');
+      valid = false;
     } else {
-      const regex = /^\S+@\S+\.\S+$/;
-      if (!regex.test(employee_email)) {
-        setEmailError('Invalid email format');
-        valid = false;
-      } else {
-        setEmailError('');
-      }
+      setEmailError('');
     }
-    if(!employee_password||employee_password.length<8){
-      setPasswordError("Password must be at least 8 characters long")
-      valid=false;
+
+    if (!employee_password || employee_password.length < 8) {
+      setPasswordError('Password must be at least 8 characters long');
+      valid = false;
+    } else {
+      setPasswordError('');
     }
-    if(!valid){
-      return;
-    }
-    const formData={
+
+    if (!valid) return;
+
+    const formData = {
       employee_email,
       employee_first_name,
       employee_last_name,
@@ -69,36 +63,34 @@ const handleSubmit =(event)=>{
       active_employee,
       company_role_id
     };
-    const newEmployee = employeeService.createEmployee(formData, loggedInEmployeeToken)
-     
-    newEmployee.then((response) => response.json())
-    .then((data)=>{
-     
-      if(data.error){
-         setServerError(data.error)
-        
-      }else{
-        setSuccess(true)
-        setServerError('')
 
-        setTimeout(()=>{
-          window.location.href="/";
-        },3000)
+    try {
+      const response = await employeeService.createEmployee(formData, loggedInEmployeeToken);
+      const data = await response.json();
+
+      if (!response.ok) {
+        setServerError(data.error || 'Failed to create employee');
+        setSuccess(false);
+        return;
       }
-    })
-     .catch((error) => {
-    const resMessage =
-      (error.response &&
-        error.response.data &&
-        error.response.data.message) ||
-      error.message ||
-      error.toString();
 
-    setServerError(resMessage);
-    })
-}
+      // Show success message
+      setSuccess(true);
+      setServerError('');
+
+      // Delay redirect so message is visible
+      setTimeout(() => {
+        window.location.href = '/';
+      }, 3000);
+
+    } catch (error) {
+      setServerError('Network error. Please try again.');
+      setSuccess(false);
+    }
+  };
+
   return (
-  <section className="contact-section eloo">
+    <section className="contact-section eloo">
       <div className="auto-container">
         <div className="contact-title">
           <h2>Adding Employee</h2>
@@ -110,45 +102,53 @@ const handleSubmit =(event)=>{
               <div className="contact-form">
                 <form onSubmit={handleSubmit}>
                   <div className="row clearfix">
-                   {success && (
-  <div
-    className="success-message"
-    role="alert"
-    style={{ color: 'green', fontWeight: 'bold', marginBottom: '15px' }}
-  >
-    Employee successfully added! Redirecting...
-  </div>
-)}
+                    {success && (
+                      <div
+                        className="success-message"
+                        role="alert"
+                        style={{ color: 'green', fontWeight: 'bold', marginBottom: '15px' }}
+                      >
+                        Employee successfully added! Redirecting...
+                      </div>
+                    )}
+
+                    {serverError && (
+                      <div className="validation-error" role="alert" style={{ color: 'red' }}>
+                        {serverError}
+                      </div>
+                    )}
 
                     <div className="form-group col-md-12">
-                       {serverError && <div className="validation-error" role="alert">{serverError}</div>}
                       <input
-                        type="email" value={employee_email}
-                        name="employee_email" onChange={event=>setEmail(event.target.value)}
+                        type="email"
+                        value={employee_email}
+                        name="employee_email"
+                        onChange={(e) => setEmail(e.target.value)}
                         placeholder="Employee Email"
-                        required
                         className="form-control"
                       />
-                       {emailError && <div className="validation-error" role="alert">{emailError}</div>}
+                      {emailError && <div className="validation-error">{emailError}</div>}
                     </div>
 
                     <div className="form-group col-md-12">
                       <input
                         type="text"
-                        name="employee_first_name" value={employee_first_name} onChange={event=>setFirstName(event.target.value)}
-                        placeholder="Employee First Name"  
-                        required
+                        name="employee_first_name"
+                        value={employee_first_name}
+                        onChange={(e) => setFirstName(e.target.value)}
+                        placeholder="Employee First Name"
                         className="form-control"
                       />
-                        {firstNameRequired && <div className="validation-error" role="alert">{firstNameRequired}</div>}
+                      {firstNameRequired && <div className="validation-error">{firstNameRequired}</div>}
                     </div>
 
                     <div className="form-group col-md-12">
                       <input
                         type="text"
-                        name="employee_last_name" value={employee_last_name} onChange={event =>setLastName(event.target.value)}
+                        name="employee_last_name"
+                        value={employee_last_name}
+                        onChange={(e) => setLastName(e.target.value)}
                         placeholder="Employee Last Name"
-                        required
                         className="form-control"
                       />
                     </div>
@@ -156,17 +156,19 @@ const handleSubmit =(event)=>{
                     <div className="form-group col-md-12">
                       <input
                         type="text"
-                        name="employee_phone" value={employee_phone}
-                        placeholder="Employee Phone (251-99-00-00-00)" onChange={event=>setPhoneNumber(event.target.value)}
-                        required
+                        name="employee_phone"
+                        value={employee_phone}
+                        onChange={(e) => setPhoneNumber(e.target.value)}
+                        placeholder="Employee Phone (251-99-00-00-00)"
                         className="form-control"
                       />
                     </div>
 
                     <div className="form-group col-md-12">
                       <select
-                        name="employee_role" value={company_role_id} onChange={event=>setCompany_role_id(event.target.value)}
-                        required
+                        name="employee_role"
+                        value={company_role_id}
+                        onChange={(e) => setCompany_role_id(e.target.value)}
                         className="form-control"
                       >
                         <option value="">Select Role</option>
@@ -179,18 +181,20 @@ const handleSubmit =(event)=>{
                     <div className="form-group col-md-12">
                       <input
                         type="password"
-                        name="employee_password" value={employee_password} onChange={event=>setPassword(event.target.value)}
+                        name="employee_password"
+                        value={employee_password}
+                        onChange={(e) => setPassword(e.target.value)}
                         placeholder="Employee Password"
                         className="form-control"
-                        required
                       />
-                       {passwordError && <div className="validation-error" role="alert">{passwordError}</div>}
+                      {passwordError && <div className="validation-error">{passwordError}</div>}
                     </div>
 
                     <div className="form-group col-md-12">
-                      <button className="theme-btn btn-style-one" type="submit" data-loading-text="Please wait..."><span>Add employee</span></button>
+                      <button className="theme-btn btn-style-one" type="submit">
+                        <span>Add employee</span>
+                      </button>
                     </div>
-
                   </div>
                 </form>
               </div>
@@ -199,8 +203,7 @@ const handleSubmit =(event)=>{
         </div>
       </div>
     </section>
-  )
-}
+  );
+};
 
-
-export default Addemployee
+export default Addemployee;
