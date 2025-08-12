@@ -17,7 +17,6 @@ const EditCustomer = () => {
   const [serverMsg, setServerMsg] = useState("");
   const [apiError, setApiError] = useState(false);
   const [apiErrorMessage, setApiErrorMessage] = useState("");
-
   const [spin, setSpinner] = useState(false);
 
   const { employee } = useAuth();
@@ -28,12 +27,16 @@ const EditCustomer = () => {
   const lastNameTracker = (e) => setLastName(e.target.value);
   const phoneNumberTracker = (e) => setPhoneNumber(e.target.value);
   const emailTracker = (e) => setEmail(e.target.value);
-  const activeCustomerStatusTracker = (e) => setActiveCustomerStatus(e.target.checked);
+  const activeCustomerStatusTracker = (e) =>
+    setActiveCustomerStatus(e.target.checked);
 
   // Fetch the customer data
   const fetchData = async () => {
     try {
-      const data = await customerService.singleCustomer(customerId, loggedInEmployeeToken);
+      const data = await customerService.singleCustomer(
+        customerId,
+        loggedInEmployeeToken
+      );
 
       setFirstName(data.customer?.customer_first_name || "");
       setLastName(data.customer?.customer_last_name || "");
@@ -46,7 +49,6 @@ const EditCustomer = () => {
     } catch (error) {
       setApiError(true);
       setApiErrorMessage("An error occurred while fetching data.");
-      // Optionally check error.status if your fetch wrapper provides it
     }
   };
 
@@ -56,37 +58,45 @@ const EditCustomer = () => {
     }
   }, [employee, loggedInEmployeeToken]);
 
-  async function handleSubmit(e) {
-    e.preventDefault();
-    const formData = {
-      customer_id: customerId,
-      customer_first_name,
-      customer_last_name,
-      customer_phone_number,
-      customer_email,
-      active_customer_status: active_customer_status ? 1 : 0,
-    };
+async function handleSubmit(e) {
+  e.preventDefault();
 
-    try {
-      setSpinner(true);
-      const data = await customerService.updateCustomer(formData, loggedInEmployeeToken);
+  const formData = {
+    customer_id: customerId,
+    customer_first_name,
+    customer_last_name,
+    customer_phone_number,
+    customer_email,
+    active_customer_status: active_customer_status ? 1 : 0,
+  };
 
-      if (data.status === 200 || data.success) { // Adjust condition based on your API response
-        setServerMsg("Redirecting To Customers page...");
-        setTimeout(() => {
-          setSpinner(false);
-          setServerMsg("");
-          navigate("/admin/customers");
-        }, 500);
-      } else {
-        setServerMsg("Failed to update customer. Please try again.");
+  try {
+    setSpinner(true);
+    const result = await customerService.updateCustomer(formData, loggedInEmployeeToken);
+
+    console.log("Update result:", result); // for debugging
+
+    if (
+      result.updateResult?.identifierRowsAffected >= 1 &&
+      result.updateResult?.infoRowsAffected >= 1
+    ) {
+      setServerMsg("Redirecting To Customers page...");
+      setTimeout(() => {
         setSpinner(false);
-      }
-    } catch (error) {
+        setServerMsg("");
+        navigate("/admin/customers");
+      }, 500);
+    } else {
       setServerMsg("Failed to update customer. Please try again.");
       setSpinner(false);
     }
+  } catch (error) {
+    setServerMsg("Failed to update customer. Please try again.");
+    setSpinner(false);
   }
+}
+
+
 
   return (
     <section className={`${classes.contactSection} contact-section`}>
@@ -144,8 +154,13 @@ const EditCustomer = () => {
                         required
                       />
                     </div>
-                    <div className={`${classes.formGroup} col-md-12 form-contro`}>
-                      <label className={classes.formCheckboxLabel} htmlFor="completed">
+                    <div
+                      className={`${classes.formGroup} col-md-12 form-contro`}
+                    >
+                      <label
+                        className={classes.formCheckboxLabel}
+                        htmlFor="completed"
+                      >
                         Active Customer
                       </label>
                       <input
@@ -157,13 +172,29 @@ const EditCustomer = () => {
                       />
                     </div>
                     <div className={`${classes.formGroup} col-md-12`}>
-                      <button className={classes.themeBtn} type="submit" data-loading-text="Please wait...">
-                        <span>{spin ? <BeatLoader color="white" size={8} /> : "Update Customer"}</span>
+                      <button
+                        className={classes.themeBtn}
+                        type="submit"
+                        data-loading-text="Please wait..."
+                      >
+                        <span>
+                          {spin ? (
+                            <BeatLoader color="white" size={8} />
+                          ) : (
+                            "Update Customer"
+                          )}
+                        </span>
                       </button>
                       {serverMsg && (
                         <div
                           className="validation-error"
-                          style={{ color: "green", fontSize: "100%", fontWeight: "600", padding: "25px" }}
+                          style={{
+                            color:
+                              serverMsg.includes("Failed") ? "red" : "green",
+                            fontSize: "100%",
+                            fontWeight: "600",
+                            padding: "25px",
+                          }}
                           role="alert"
                         >
                           {serverMsg}

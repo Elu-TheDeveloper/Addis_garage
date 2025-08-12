@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import EmployeeAuthHeader from '../utils/auth_headers';
 
-const AuthContext = React.createContext(); // Fixed capitalization
+const AuthContext = React.createContext(); 
 
 export const useAuth = () => {
     return useContext(AuthContext);

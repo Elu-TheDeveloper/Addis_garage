@@ -1,7 +1,8 @@
 import React, { useState } from 'react'
 import employeeService from '../../../Services/employee.service'
 
-import { useAuth } from '../../../context/AuthContext'
+import { useAuth } from '../../../Context/AuthContext' 
+
 const Addemployee = () => {
 const[employee_email,setEmail]=useState('')
 const [employee_first_name, setFirstName]=useState('')
@@ -14,7 +15,7 @@ const[company_role_id,setCompany_role_id]=useState(1)
 const[emailError,setEmailError]=useState('')
 const [firstNameRequired,setFirstNameRequired]=useState('')
 const [passwordError, setPasswordError]=useState('')
-const [success, setSuccess]=useState('false')
+const [success, setSuccess]=useState(false)
 const [serverError, setServerError]=useState('')
 
 
