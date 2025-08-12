@@ -99,7 +99,11 @@ async function updateCustomerController(req, res, next) {
   try {
     const updateResult = await updateCustomer(req.body);
 
-    if (!updateResult) {
+    if (
+      !updateResult ||
+      updateResult.identifierRowsAffected < 1 ||
+      updateResult.infoRowsAffected < 1
+    ) {
       return res.status(400).json({
         error: "Failed to update customer!",
       });
@@ -107,16 +111,20 @@ async function updateCustomerController(req, res, next) {
 
     return res.status(200).json({
       status: "Customer successfully updated!",
-      updateResult,
+      updateResult,  // <-- send the object here
     });
   } catch (error) {
     console.error("Update Customer Error:", error);
     return res.status(500).json({
       error: "Something went wrong!",
-      details: error.message,   // send error message for debugging
+      details: error.message,
     });
   }
 }
+
+
+
+
 
 
 // Delete Customer controller

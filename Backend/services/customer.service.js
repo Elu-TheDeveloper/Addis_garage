@@ -136,6 +136,7 @@ async function getAllCustomers(offset = 0) {
 }
 
 // Update customer by ID
+// Update customer by ID
 async function updateCustomer(customer) {
   try {
     const sanitizedId = xss(customer.customer_id);
@@ -149,14 +150,14 @@ async function updateCustomer(customer) {
     try {
       await conn.beginTransaction();
 
-      await conn.query(
+      const [result1] = await conn.query(
         `UPDATE customer_identifier
          SET customer_email = ?, customer_phone_number = ?
          WHERE customer_id = ?` ,
         [sanitizedEmail, sanitizedPhone, sanitizedId]
       );
 
-      await conn.query(
+      const [result2] = await conn.query(
         `UPDATE customer_info
          SET customer_first_name = ?, customer_last_name = ?, active_customer_status = ?
          WHERE customer_id = ?` ,
@@ -164,7 +165,11 @@ async function updateCustomer(customer) {
       );
 
       await conn.commit();
-      return true;
+
+      return {
+        identifierRowsAffected: result1.affectedRows,
+        infoRowsAffected: result2.affectedRows
+      };
     } catch (err) {
       await conn.rollback();
       throw err;
@@ -176,6 +181,7 @@ async function updateCustomer(customer) {
     throw new Error("Could not update customer. Please try again later.");
   }
 }
+
 
 // Delete customer by ID
 async function deleteCustomer(customer_id) {
