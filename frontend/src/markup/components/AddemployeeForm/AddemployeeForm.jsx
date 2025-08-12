@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import employeeService from '../../../Services/employee.service';
+import employeeService from '../../../services/employee.service';
 import { useAuth } from '../../../context/AuthContext';
 
 const Addemployee = () => {
@@ -23,71 +23,67 @@ const Addemployee = () => {
     loggedInEmployeeToken = employee.employee_token;
   }
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
+ const handleSubmit = async (event) => {
+  event.preventDefault();
 
-    // Form validation
-    let valid = true;
-    if (!employee_first_name) {
-      setFirstNameRequired('First name is required');
-      valid = false;
-    } else {
-      setFirstNameRequired('');
-    }
+  let valid = true;  
 
-    if (!employee_email) {
-      setEmailError('Email is required');
-      valid = false;
-    } else if (!/^\S+@\S+\.\S+$/.test(employee_email)) {
-      setEmailError('Invalid email format');
-      valid = false;
-    } else {
-      setEmailError('');
-    }
+  // Validation
+  if (!employee_first_name) {
+    setFirstNameRequired('First name is required');
+    valid = false;
+  } else {
+    setFirstNameRequired('');
+  }
 
-    if (!employee_password || employee_password.length < 8) {
-      setPasswordError('Password must be at least 8 characters long');
-      valid = false;
-    } else {
-      setPasswordError('');
-    }
+  if (!employee_email) {
+    setEmailError('Email is required');
+    valid = false;
+  } else if (!/^\S+@\S+\.\S+$/.test(employee_email)) {
+    setEmailError('Invalid email format');
+    valid = false;
+  } else {
+    setEmailError('');
+  }
 
-    if (!valid) return;
+  if (!employee_password || employee_password.length < 8) {
+    setPasswordError('Password must be at least 8 characters long');
+    valid = false;
+  } else {
+    setPasswordError('');
+  }
 
-    const formData = {
-      employee_email,
-      employee_first_name,
-      employee_last_name,
-      employee_phone,
-      employee_password,
-      active_employee,
-      company_role_id
-    };
+  if (!valid) return;  
 
-    try {
-      const response = await employeeService.createEmployee(formData, loggedInEmployeeToken);
-      const data = await response.json();
+  const formData = {
+    employee_email,
+    employee_first_name,
+    employee_last_name,
+    employee_phone,
+    employee_password,
+    active_employee,
+    company_role_id,
+  };
 
-      if (!response.ok) {
-        setServerError(data.error || 'Failed to create employee');
-        setSuccess(false);
-        return;
-      }
+  try {
+    const res = await employeeService.createEmployee(formData, loggedInEmployeeToken);
 
-      // Show success message
+    if (res.status === 201) {
       setSuccess(true);
       setServerError('');
-
-      // Delay redirect so message is visible
+      // Redirect after 3 seconds so user sees success message
       setTimeout(() => {
         window.location.href = '/';
       }, 3000);
-
-    } catch (error) {
-      setServerError('Network error. Please try again.');
+    } else {
+      setServerError(res.data.message || 'Failed to create employee');
       setSuccess(false);
     }
-  };
+  } catch (error) {
+    setServerError('Network error. Please try again.');
+    setSuccess(false);
+  }
+};
 
   return (
     <section className="contact-section eloo">

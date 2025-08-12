@@ -4,6 +4,7 @@ import Home from './markup/pages/Home'
 import Login from './markup/pages/Login'
 import Addemployee from './markup/pages/admin/Employee/Addemployee'
 import Employees from './markup/pages/admin/Employee/Employees'
+import EditEmployee from './markup/pages/admin/Employee/EditEmployee'
 import Customer from "./markup/pages/admin/Customers/Customers"
 import CustomerForm from './markup/pages/admin/Customers/CustomerForm'
 import EditCustomer from './markup/components/Admin/CustomerForm/EditCustomer'
@@ -41,17 +42,37 @@ function App() {
 <Orders/>
 </PrivateAuthRoute>
 } />
+
+
 <Route path="/admin/add-employee" element ={
   <PrivateAuthRoute roles ={[3]}>
 <Addemployee/>
 </PrivateAuthRoute>
 
 } />
+
+   <Route
+          path="admin/employee/edit/:id"
+          element={
+            <PrivateAuthRoute roles={[3]}>
+              <EditEmployee />
+            </PrivateAuthRoute>
+          }
+        />
     <Route
           path="/admin/customers"
           element={
             <PrivateAuthRoute roles={[1, 2, 3]}>
               <Customer />
+            </PrivateAuthRoute>
+          }
+        />
+
+        <Route
+          path="admin/employees"
+          element={
+            <PrivateAuthRoute roles={[3]}>
+              <Employees />
             </PrivateAuthRoute>
           }
         />
