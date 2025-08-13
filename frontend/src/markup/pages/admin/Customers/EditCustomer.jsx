@@ -10,7 +10,6 @@ function EditCustomer(props) {
     phone: "555-555-5555",
     active: true,
   };
-
   const handleSave = (updatedCustomer) => {
     console.log("Updated Customer:", updatedCustomer);
   };

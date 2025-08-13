@@ -5,6 +5,7 @@ import Login from './markup/pages/Login'
 import Addemployee from './markup/pages/admin/Employee/Addemployee'
 import Employees from './markup/pages/admin/Employee/Employees'
 import EditEmployee from './markup/pages/admin/Employee/EditEmployee'
+import EmployeeProfile from './markup/pages/admin/Employee/EmployeeProfile'
 import Customer from "./markup/pages/admin/Customers/Customers"
 import CustomerForm from './markup/pages/admin/Customers/CustomerForm'
 import EditCustomer from './markup/components/Admin/CustomerForm/EditCustomer'
@@ -75,6 +76,12 @@ function App() {
               <Employees />
             </PrivateAuthRoute>
           }
+        />
+
+
+         <Route
+          path="/admin/employee-profile/:id"
+          element={<EmployeeProfile />}
         />
          <Route
           path="/admin/edit-customer/:customerId"

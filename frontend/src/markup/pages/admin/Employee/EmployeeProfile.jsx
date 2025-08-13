@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useAuth } from "../../../../Context/AuthContext";
+import { useAuth } from "../../../../context/AuthContext";
 import Avatar from "react-avatar";
 import { useParams, useNavigate } from "react-router-dom";
 import { Bar } from "react-chartjs-2";

@@ -1,172 +1,107 @@
 import React, { useState, useEffect } from "react";
-import { useAuth } from "../../../../Context/AuthContext";
-import Avatar from "react-avatar";
-import { useParams, useNavigate } from "react-router-dom";
-import { Bar } from "react-chartjs-2";
-import employeeService from "../../../../services/employee.service";
-import "./EmployeeProfile.css";
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
-} from "chart.js";
-
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend
-);
+import { useAuth } from "../../../../context/AuthContext";
 
 function EmployeeProfile() {
-  const { id } = useParams();
-  const navigate = useNavigate();
   const { employee } = useAuth();
-  console.log(employee);
-
-  const [employeeDetails, setEmployeeDetails] = useState({});
-  const [performanceData, setPerformanceData] = useState({
-    labels: ["Q1", "Q2", "Q3", "Q4"],
-    datasets: [
-      {
-        label: "Performance",
-        backgroundColor: "#FBA617",
-        borderColor: "rgba(0,0,0,1)",
-        borderWidth: 2,
-        data: [65, 59, 80, 81],
-      },
-    ],
+  const [employeeDetails, setEmployeeDetails] = useState({
+    employee_id: "",
+    employee_email: "",
+    employee_first_name: "",
+    employee_last_name: "",
+    employee_phone: "",
+    company_role_id: 1,
+    active_employee: 1,
+    date_of_employeed: "",
   });
 
   useEffect(() => {
-    const fetchEmployeeDetails = async () => {
-      try {
-        const response = await employeeService.singleEmployee(
-          employee.employee_token,
-          id
-        );
-        if (
-          response &&
-          response.singleEmployee &&
-          response.singleEmployee.length > 0
-        ) {
-          setEmployeeDetails(response.singleEmployee[0]);
-        }
-      } catch (error) {
-        console.error("Error fetching employee details:", error);
-      }
-    };
-
-    if (id && employee && employee.employee_token) {
-      if (
-        employee.employee_id === parseInt(id) ||
-        employee.employee_role === 3
-      ) {
-        fetchEmployeeDetails();
-      } else {
-        navigate("/not-authorized"); // Redirect to a not authorized page
-      }
+    if (employee) {
+      setEmployeeDetails({
+        employee_id: employee.employee_id,
+        employee_email: employee.employee_email,
+        employee_first_name: employee.employee_first_name,
+        employee_last_name: employee.employee_last_name,
+        employee_phone: employee.employee_phone,
+        company_role_id: employee.employee_role, 
+        active_employee: employee.active_employee,
+        date_of_employeed: employee.date_of_employeed,
+      });
     }
-  }, [employee, id, navigate]);
-
-  const formatDate = (dateString) => {
-    const options = { year: "numeric", month: "long", day: "numeric" };
-    return new Date(dateString).toLocaleDateString("en-US", options);
-  };
+  }, [employee]);
 
   const getRoleName = () => {
-    switch (employeeDetails.company_role_id) {
+    let role = "";
+    switch (
+      employeeDetails.company_role_id // Corrected to use `company_role_id`
+    ) {
       case 1:
-        return "Employee";
+        role = "Employee";
+        break;
       case 2:
-        return "Manager";
+        role = "Manager";
+        break;
       case 3:
-        return "Admin";
+        role = "Admin";
+        break;
       default:
-        return "Unknown";
+        role = "Unknown";
     }
+    return role;
   };
 
   return (
     <section className="profile-section">
-      <div className="profile-container">
-        <div className="profile-header">
-          <Avatar
-            name={`${employeeDetails.employee_first_name} ${employeeDetails.employee_last_name}`}
-            size="150"
-            round={true}
-          />
-          <h2>
-            {employeeDetails.employee_first_name}{" "}
-            {employeeDetails.employee_last_name}
-          </h2>
-          <p>{getRoleName()}</p>
+      <div className="auto-container">
+        <div className="profile-title">
+          <h2>Employee Profile</h2>
         </div>
-
-        <div className="profile-details">
-          <div className="detail-item">
-            <strong>Employee ID:</strong> {employeeDetails.employee_id}
+        <div className="row clearfix">
+          {/* Profile Image Column */}
+          <div className="form-column col-lg-5">
+            <div className="inner-column">
+              <div className="profile-image">
+                <figure className="image">
+                  <img
+                    src="/path/to/employee/profile/image.jpg"
+                    alt="Profile"
+                  />
+                </figure>
+              </div>
+            </div>
           </div>
-          <div className="detail-item">
-            <strong>Email:</strong> {employeeDetails.employee_email}
+          {/* Profile Details Column */}
+          <div className="form-column col-lg-7">
+            {/* Employee Details */}
+            <div className="profile-details">
+              <div className="detail-item">
+                <strong>Employee ID:</strong> {employeeDetails.employee_id}
+              </div>
+              <div className="detail-item">
+                <strong>Email:</strong> {employeeDetails.employee_email}
+              </div>
+              <div className="detail-item">
+                <strong>First Name:</strong>{" "}
+                {employeeDetails.employee_first_name}
+              </div>
+              <div className="detail-item">
+                <strong>Last Name:</strong> {employeeDetails.employee_last_name}
+              </div>
+              <div className="detail-item">
+                <strong>Phone:</strong> {employeeDetails.employee_phone}
+              </div>
+              <div className="detail-item">
+                <strong>Role:</strong> {getRoleName()}
+              </div>
+              <div className="detail-item">
+                <strong>Status:</strong>{" "}
+                {employeeDetails.active_employee ? "Active" : "Inactive"}
+              </div>
+              <div className="detail-item">
+                <strong>Date of Employeed:</strong>{" "}
+                {employeeDetails.date_of_employeed}
+              </div>
+            </div>
           </div>
-          <div className="detail-item">
-            <strong>Phone:</strong> {employeeDetails.employee_phone}
-          </div>
-          <div className="detail-item">
-            <strong>Status:</strong>{" "}
-            {employeeDetails.active_employee ? "Active" : "Inactive"}
-          </div>
-          <div className="detail-item">
-            <strong>Date of Employed:</strong>{" "}
-            {formatDate(employeeDetails.added_date)}
-          </div>
-          <div className="detail-item">
-            <strong>Vacation Days Remaining:</strong> 10
-          </div>
-          <div className="detail-item">
-            <strong>Sick Leave Remaining:</strong> 5
-          </div>
-          <div className="detail-item">
-            <strong>Salary Details:</strong> $75,000 per year
-          </div>
-          <div className="detail-item">
-            <strong>Remaining Vacation Balance:</strong> 4.25 days
-          </div>
-        </div>
-
-        <div className="performance-chart">
-          <h3>Performance Metrics</h3>
-          <Bar
-            data={performanceData}
-            options={{
-              responsive: true,
-              plugins: {
-                title: {
-                  display: true,
-                  text: "Quarterly Performance",
-                },
-                legend: {
-                  display: true,
-                  position: "right",
-                },
-              },
-              scales: {
-                x: {
-                  type: "category",
-                },
-                y: {
-                  beginAtZero: true,
-                },
-              },
-            }}
-          />
         </div>
       </div>
     </section>
