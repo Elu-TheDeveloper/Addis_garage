@@ -70,7 +70,7 @@ function App() {
         />
 
         <Route
-          path="admin/employees"
+          path="admin/employee"
           element={
             <PrivateAuthRoute roles={[3]}>
               <Employees />
