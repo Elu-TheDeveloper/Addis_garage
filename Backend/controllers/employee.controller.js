@@ -1,6 +1,9 @@
 const { pool } = require('../config/db.config');
 const bcrypt = require('bcrypt');
 const xss = require('xss');
+const { getAllEmployees: getAllEmployeesService,  getSingleEmployeeService } = require('../services/employee.service');
+
+
 
 // Sanitize all input
 function sanitize(value) {
@@ -8,19 +11,6 @@ function sanitize(value) {
 }
 
 // Check if employee exists by email
-async function checkIfEmployeeExists(email) {
-  try {
-    const trimmedEmail = sanitize((email || '').toLowerCase());
-    const [rows] = await pool.query(
-      'SELECT employee_id FROM employee WHERE LOWER(employee_email) = ? LIMIT 1',
-      [trimmedEmail]
-    );
-    return rows.length > 0;
-  } catch (error) {
-    console.error('Error checking if employee exists:', error);
-    throw error;
-  }
-}
 
 // Check if company role ID exists
 async function checkIfCompanyRoleExists(company_role_id) {
@@ -76,6 +66,20 @@ async function createEmployee(req, res, next) {
     });
   }
 }
+async function checkIfEmployeeExists(email) {
+  try {
+    const trimmedEmail = sanitize((email || '').toLowerCase());
+    const [rows] = await pool.query(
+      'SELECT employee_id FROM employee WHERE LOWER(employee_email) = ? LIMIT 1',
+      [trimmedEmail]
+    );
+    return rows.length > 0;
+  } catch (error) {
+    console.error('Error checking if employee exists:', error);
+    throw error;
+  }
+}
+
 
 // Transactional employee creation
 async function createEmployeeWithTransaction(employeeData) {
@@ -134,8 +138,72 @@ async function getEmployeeByEmail(employee_email) {
   return rows;
 }
 
+async function getAllEmployees(req, res, next) {
+  try {
+    const employees = await getAllEmployeesService(); // call the service
+    if (!employees || employees.length === 0) {
+      return res.status(404).json({ error: "No employees found!" });
+    }
+    return res.status(200).json({
+      status: "Employees retrieved successfully!",
+      employees,
+    });
+  } catch (error) {
+    console.error("Error fetching employees:", error);
+    return res.status(500).json({ error: "Something went wrong!" });
+  }
+}
+async function deleteEmployee(req, res, next) {
+  const id = req.params.id;
+
+  if (!id) {
+    return res.status(400).json({ error: "Employee ID is required" });
+  }
+
+  try {
+    const deleteEmployeeResult = await ServicedeleteEmployee(id);
+
+    res.status(200).json({
+      message: "Employee successfully deleted!",
+    });
+  } catch (error) {
+    console.error("Error deleting employee:", error);
+    res.status(500).json({
+      error: error.message || "Something went wrong while deleting the employee!",
+    });
+  }
+}
+
+async function getSingleEmployee(req, res, next) {
+  const employee_hash = req.params.id;
+  try {
+    const singleEmployee = await getSingleEmployeeService(employee_hash);
+
+    if (!singleEmployee) {
+      res.status(400).json({
+        error: "Failed to get employee!",
+      });
+    } else {
+      res.status(200).json({
+        status: "Employee retrieved successfully! ",
+        singleEmployee: singleEmployee,
+      });
+    }
+  } catch (error) {
+    res.status(400).json({
+      error: "Something went wrong!",
+    });
+  }
+}
 module.exports = {
   checkIfEmployeeExists,
   createEmployee,
-  getEmployeeByEmail
+  getEmployeeByEmail,
+  getAllEmployees,
+  getSingleEmployee,
+  checkIfCompanyRoleExists,
+  deleteEmployee,
+  getAllEmployeesService,
+  getSingleEmployeeService
+  
 };

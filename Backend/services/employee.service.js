@@ -94,6 +94,20 @@ const checkIfCompanyRoleExists = async (roleId) => {
     connection.release();
   }
 };
+async function getSingleEmployeeService(employee) {
+  try {
+    const employee_id = employee;
+
+    const query =
+      "SELECT * FROM employee INNER JOIN employee_info ON employee.employee_id = employee_info.employee_id INNER JOIN employee_role ON employee.employee_id = employee_role.employee_id INNER JOIN company_roles ON employee_role.company_role_id = company_roles.company_role_id WHERE employee.employee_id = ?";
+
+    const rows = await connection.query(query, [employee_id]);
+
+    return rows;
+  } catch (error) {
+    console.log(error);
+  }
+}
 
 // Get employee by email
 async function getEmployeeByEmail(employee_email) {
@@ -189,6 +203,56 @@ const createEmployee = async (employeeData) => {
     connection.release();
   }
 };
+async function getAllEmployees() {
+  const connection = await pool.getConnection(); // get a connection from the pool
+  try {
+    const query = `
+      SELECT * 
+      FROM employee
+      INNER JOIN employee_info ON employee.employee_id = employee_info.employee_id
+      INNER JOIN employee_role ON employee.employee_id = employee_role.employee_id
+      INNER JOIN company_roles ON employee_role.company_role_id = company_roles.company_role_id
+      ORDER BY employee.active_employee DESC, employee_info.employee_first_name ASC
+      LIMIT 40
+    `;
+    const [rows] = await connection.query(query);
+    return rows;
+  } catch (error) {
+    console.error('Error fetching employees:', error);
+    throw error;
+  } finally {
+    connection.release(); // release the connection back to the pool
+  }
+}
+async function ServicedeleteEmployee(employee_id) {
+  const connection = await pool.getConnection(); // get a connection from the pool
+  try {
+    await connection.beginTransaction();
+
+    console.log("Employee to be deleted id >>>", employee_id);
+
+    const query1 = "DELETE FROM employee_info WHERE employee_id = ?";
+    const query2 = "DELETE FROM employee_role WHERE employee_id = ?";
+    const query3 = "DELETE FROM employee_pass WHERE employee_id = ?";
+    const query4 = "DELETE FROM employee WHERE employee_id = ?";
+
+    await connection.query(query1, [employee_id]);
+    await connection.query(query2, [employee_id]);
+    await connection.query(query3, [employee_id]);
+    await connection.query(query4, [employee_id]);
+
+    await connection.commit();
+    return { message: "Employee successfully deleted!" };
+  } catch (error) {
+    await connection.rollback();
+    console.error("Error deleting employee:", error);
+    throw new Error("Could not delete employee. Please try again later.");
+  } finally {
+    connection.release(); // always release the connection
+  }
+}
+
+
 
 // Validate middleware
 const validate = (req, res, next) => {
@@ -210,5 +274,8 @@ module.exports = {
   checkIfCompanyRoleExists,
   createEmployee,
   getEmployeeByEmail,
+  getAllEmployees,  
+  getSingleEmployeeService,
+  ServicedeleteEmployee,
   ERRORS
 };
