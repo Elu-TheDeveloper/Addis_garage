@@ -1,7 +1,7 @@
 const { pool } = require('../config/db.config');
 const bcrypt = require('bcrypt');
 const xss = require('xss');
-const { getAllEmployees: getAllEmployeesService,  getSingleEmployeeService } = require('../services/employee.service');
+const { getAllEmployees: getAllEmployeesService,  getSingleEmployeeService, } = require('../services/employee.service');
 
 
 
@@ -153,27 +153,58 @@ async function getAllEmployees(req, res, next) {
     return res.status(500).json({ error: "Something went wrong!" });
   }
 }
-async function deleteEmployee(req, res, next) {
-  const id = req.params.id;
-
-  if (!id) {
-    return res.status(400).json({ error: "Employee ID is required" });
-  }
-
+async function updateEmployee(req, res, next) {
   try {
-    const deleteEmployeeResult = await ServicedeleteEmployee(id);
+    const updateEmployee = await updateEmployeeService(req.body);
 
-    res.status(200).json({
-      message: "Employee successfully deleted!",
-    });
+    // the returned rows value
+    const rows1 = updateEmployee.rows1.affectedRows;
+    const rows2 = updateEmployee.rows2.affectedRows;
+    const rows3 = updateEmployee.rows3.affectedRows;
+
+    if (!updateEmployee) {
+      res.status(400).json({
+        error: "Failed to Update Employee",
+      });
+    } else if (rows1 === 1 && rows2 === 1 && rows3 === 1) {
+      res.status(200).json({
+        status: "Employee Succesfully Updated! ",
+      });
+    } else {
+      res.status(400).json({
+        status: "Update Incomplete!",
+      });
+    }
   } catch (error) {
-    console.error("Error deleting employee:", error);
-    res.status(500).json({
-      error: error.message || "Something went wrong while deleting the employee!",
+    res.status(400).json({
+      error: "Something went wrong!",
     });
   }
 }
 
+
+
+
+async function deleteEmployee(req, res, next) {
+  const id = req.params.id;
+  try {
+    const deleteEmployeeResult = await ServicedeleteEmployee(id);
+
+    if (deleteEmployeeResult) {
+      res.status(200).json({
+        message: "Employee successfully deleted!",
+      });
+    } else {
+      res.status(400).json({
+        status: "Delete incomplete!",
+      });
+    }
+  } catch (error) {
+    res.status(400).json({
+      error: "Something went wrong!",
+    });
+  }
+}
 async function getSingleEmployee(req, res, next) {
   const employee_hash = req.params.id;
   try {
@@ -200,10 +231,12 @@ module.exports = {
   createEmployee,
   getEmployeeByEmail,
   getAllEmployees,
+  updateEmployee,
   getSingleEmployee,
   checkIfCompanyRoleExists,
   deleteEmployee,
   getAllEmployeesService,
   getSingleEmployeeService
+
   
 };

@@ -1,15 +1,12 @@
-const express =require('express')
+const express = require('express');
+const router = express.Router();
 
-const router = express.Router()
+const authMiddleware = require("../middlewares/auth");
+const employeeController = require('../controllers/employee.controller');
 
-const employeeController = require('../controllers/employee.controller')
-const authMiddleware = require("../middlewares/auth") 
-router.post('/api/employee',authMiddleware.verifyToken ,authMiddleware.isAdmin, employeeController.createEmployee)
-router.get('/api/employee', authMiddleware.verifyToken, authMiddleware.isAdmin, employeeController.getAllEmployees)
-router.delete(
-  '/api/employee/:id',
-  authMiddleware.verifyToken,
-  authMiddleware.isAdmin,
-  employeeController.deleteEmployee
-);
-module.exports = router
+router.post('/api/employee', authMiddleware.verifyToken, authMiddleware.isAdmin, employeeController.createEmployee);
+router.get('/api/employee', authMiddleware.verifyToken, authMiddleware.isAdmin, employeeController.getAllEmployees);
+router.delete('/api/employee/:id', authMiddleware.verifyToken, authMiddleware.isAdmin, employeeController.deleteEmployee);
+router.put('/api/employee/update', authMiddleware.verifyToken, authMiddleware.isAdmin, employeeController.updateEmployee);
+
+module.exports = router;

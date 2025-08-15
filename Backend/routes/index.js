@@ -1,24 +1,44 @@
-// Import the Express module
-const express = require('express')
+const express = require('express');
+const router = express.Router();
 
-// Create a new router instance from Express
-const router = express.Router()
+// Import routes
+const installRouter = require('./install.routes');
+const employeeRouter = require('./employee.routes');
+const loginRoutes = require('./login.routes');
+const customerRoute = require('./customer.routes');
 
-// Import the install-related routes from install.routes
-const installRouter = require('./install.routes')
+// Add JSON parsing middleware FIRST
+router.use(express.json());
 
-// Import the employee-related routes from employee.routes file
-const employeeRouter = require('./employee.routes')
+// Add proper CORS headers
+router.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', process.env.FRONTEND_URL || '*');
+  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  next();
+});
 
-const loginRoutes =require('./login.routes')
-const customerRoute = require('./customer.routes')
+// Mount routes
+router.use(installRouter);
+router.use(employeeRouter);
+router.use(loginRoutes);
+router.use(customerRoute);
 
-// Use installRouter for handling install-related routes
-router.use(installRouter)
+// 404 Handler (catches all unhandled routes)
+router.use((req, res) => {
+  res.status(404).json({
+    status: 'fail',
+    message: 'Endpoint not found'
+  });
+});
 
-// Use employeeRouter for handling employee-related routes
-router.use(employeeRouter)
-router.use(loginRoutes)
-router.use(customerRoute)
+// Error handler (catches all errors)
+router.use((err, req, res, next) => {
+  console.error('Server error:', err);
+  res.status(err.status || 500).json({
+    status: 'error',
+    message: err.message || 'Internal server error'
+  });
+});
 
-module.exports = router
+module.exports = router;

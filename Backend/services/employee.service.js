@@ -224,33 +224,118 @@ async function getAllEmployees() {
     connection.release(); // release the connection back to the pool
   }
 }
-async function ServicedeleteEmployee(employee_id) {
-  const connection = await pool.getConnection(); // get a connection from the pool
+async function updateCustomer(customer) {
+  const conn = await connection.getConnection();
   try {
-    await connection.beginTransaction();
+    await conn.beginTransaction();
 
-    console.log("Employee to be deleted id >>>", employee_id);
+    const customer_id = customer.customer_id;
+    const customer_email = customer.customer_email ?? null;
+    const customer_phone_number = customer.customer_phone_number ?? null;
+    const customer_first_name = customer.customer_first_name ?? null;
+    const customer_last_name = customer.customer_last_name ?? null;
+    const active_customer_status = customer.active_customer_status ?? null;
 
-    const query1 = "DELETE FROM employee_info WHERE employee_id = ?";
-    const query2 = "DELETE FROM employee_role WHERE employee_id = ?";
-    const query3 = "DELETE FROM employee_pass WHERE employee_id = ?";
-    const query4 = "DELETE FROM employee WHERE employee_id = ?";
+    const query1 = `
+      UPDATE customer_identifier
+      SET customer_email = ?, customer_phone_number = ?
+      WHERE customer_id = ?
+    `;
 
-    await connection.query(query1, [employee_id]);
-    await connection.query(query2, [employee_id]);
-    await connection.query(query3, [employee_id]);
-    await connection.query(query4, [employee_id]);
+    const query2 = `
+      UPDATE customer_info
+      SET customer_first_name = ?, customer_last_name = ?, active_customer_status = ?
+      WHERE customer_id = ?
+    `;
 
-    await connection.commit();
-    return { message: "Employee successfully deleted!" };
+    const [result1] = await conn.query(query1, [
+      customer_email,
+      customer_phone_number,
+      customer_id,
+    ]);
+
+    const [result2] = await conn.query(query2, [
+      customer_first_name,
+      customer_last_name,
+      active_customer_status,
+      customer_id,
+    ]);
+
+    await conn.commit();
+    return { result1, result2 };
   } catch (error) {
-    await connection.rollback();
-    console.error("Error deleting employee:", error);
-    throw new Error("Could not delete employee. Please try again later.");
+    await conn.rollback();
+    console.error("Error updating customer:", error);
+    throw new Error("Could not update customer. Please try again later.");
   } finally {
-    connection.release(); // always release the connection
+    conn.release();
   }
 }
+
+async function updateEmployeeService(employee) {
+  try {
+    // Check if all required fields are provided
+    const {
+      employee_id,
+      employee_first_name,
+      employee_last_name,
+      employee_phone,
+      company_role_id,
+      employee_email,
+      active_employee,
+    } = employee;
+
+    if (
+      employee_id === undefined ||
+      employee_first_name === undefined ||
+      employee_last_name === undefined ||
+      employee_phone === undefined ||
+      company_role_id === undefined ||
+      employee_email === undefined ||
+      active_employee === undefined
+    ) {
+      throw new Error("One or more parameters are undefined.");
+    }
+
+    // Log the input data
+    console.log("Updating employee with data:", employee);
+
+    const query1 = `UPDATE employee_info SET employee_first_name = ?, employee_last_name = ?, employee_phone = ? WHERE employee_id = ?`;
+
+    const query2 = `UPDATE employee_role SET company_role_id = ? WHERE employee_id = ?`;
+
+    const query3 = `UPDATE employee SET employee_email = ?, active_employee = ? WHERE employee_id = ?`;
+
+    // for employee_info table
+    const rows1 = await connection.query(query1, [
+      employee_first_name,
+      employee_last_name,
+      employee_phone,
+      employee_id,
+    ]);
+
+    // for employee_role table
+    const rows2 = await connection.query(query2, [
+      company_role_id,
+      employee_id,
+    ]);
+
+    // for employee table
+    const rows3 = await connection.query(query3, [
+      employee_email,
+      active_employee,
+      employee_id,
+    ]);
+
+    return { rows1, rows2, rows3 };
+  } catch (error) {
+    console.log("Error updating employee:", error);
+    throw error;
+  }
+}
+
+
+
 
 
 
@@ -274,8 +359,9 @@ module.exports = {
   checkIfCompanyRoleExists,
   createEmployee,
   getEmployeeByEmail,
-  getAllEmployees,  
+  getAllEmployees, 
+  updateCustomer,
+  updateEmployeeService,
   getSingleEmployeeService,
-  ServicedeleteEmployee,
   ERRORS
 };

@@ -16,8 +16,6 @@ app.use(cors(corsOptions))
 app.use(express.json())
 
 
-
-
 const router = require('./routes')
 app.use(router)
 
