@@ -39,6 +39,33 @@ const getAllEmployees = async (token) => {
     return { status: 500, data: { message: "Failed to fetch employees" } };
   }
 };
+
+const updateEmployee = async (formData, loggedInEmployeeToken) => {
+  try {
+    const response = await fetch(`${api_url}/api/employee/update`, {
+      method: "PUT",
+      headers: {
+        "x-access-token": loggedInEmployeeToken,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(formData),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return { status: response.status, data };
+  } catch (error) {
+    console.error("Failed to update employee:", error);
+    return { status: 500, data: { message: "Failed to update employee" } };
+  }
+};
+
+
+
+
 async function deleteEmployee(loggedInEmployeeToken, id) {
   try {
     const url = `${api_url}/api/employee/${id}`;
@@ -78,4 +105,4 @@ async function deleteEmployee(loggedInEmployeeToken, id) {
 
 
 
-export default  {createEmployee,getAllEmployees,deleteEmployee}
+export default  {createEmployee,getAllEmployees,deleteEmployee,updateEmployee}
