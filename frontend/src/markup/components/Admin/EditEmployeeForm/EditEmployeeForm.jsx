@@ -118,7 +118,7 @@ function EditEmployeeForm() {
         setTimeout(() => {
           setSpinner(false);
           setServerMsg("");
-          navigate("/admin/employees");
+          navigate("/admin/employee");
         }, 500);
       }
     } catch (error) {

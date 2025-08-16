@@ -24,9 +24,14 @@ const createEmployee = async (formData, token) => {
 
 const getAllEmployees = async (token) => {
   try {
-    const response = await fetch(`${api_url}/api/employee`, {
-    headers: { 'Authorization': `Bearer ${token}` }
-    });
+
+const response = await fetch(`${api_url}/api/employee`, {
+  method: 'GET', // or POST, PUT, DELETE
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${token}`,
+  },
+});
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -45,11 +50,13 @@ const updateEmployee = async (formData, loggedInEmployeeToken) => {
     const response = await fetch(`${api_url}/api/employee/update`, {
       method: "PUT",
       headers: {
-        "x-access-token": loggedInEmployeeToken,
+        "Authorization": `Bearer ${loggedInEmployeeToken}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify(formData),
     });
+
+    console.log("TOKEN RECEIVED:", loggedInEmployeeToken);
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -62,6 +69,7 @@ const updateEmployee = async (formData, loggedInEmployeeToken) => {
     return { status: 500, data: { message: "Failed to update employee" } };
   }
 };
+
 
 
 
