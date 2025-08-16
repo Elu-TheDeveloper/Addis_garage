@@ -53,7 +53,9 @@ const isAdmin = async (req, res, next) => {
     });
   }
 
-  if (employee.company_role_id === 3) {
+  console.log("Employee company_role_id:", employee.company_role_id); // debug
+
+  if (employee.company_role_id === 3) { // 3 = Admin
     return next();
   } else {
     return res.status(403).send({
@@ -62,6 +64,8 @@ const isAdmin = async (req, res, next) => {
     });
   }
 };
+
+
 
 
 const authMiddleware = {

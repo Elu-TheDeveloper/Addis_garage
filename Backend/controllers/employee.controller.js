@@ -1,7 +1,7 @@
 const { pool } = require('../config/db.config');
 const bcrypt = require('bcrypt');
 const xss = require('xss');
-const { getAllEmployees: getAllEmployeesService,  getSingleEmployeeService, } = require('../services/employee.service');
+const { getAllEmployees: getAllEmployeesService,  getSingleEmployeeService, updateEmployeeService } = require('../services/employee.service');
 
 
 
@@ -155,34 +155,35 @@ async function getAllEmployees(req, res, next) {
 }
 async function updateEmployee(req, res, next) {
   try {
+    console.log("Incoming request headers:", req.headers);
+    console.log("Incoming update data:", req.body);
     const updateEmployee = await updateEmployeeService(req.body);
-
-    // the returned rows value
+    console.log("Rows returned from service:", updateEmployee);
     const rows1 = updateEmployee.rows1.affectedRows;
     const rows2 = updateEmployee.rows2.affectedRows;
     const rows3 = updateEmployee.rows3.affectedRows;
+    console.log("rows1:", rows1, "rows2:", rows2, "rows3:", rows3);
 
-    if (!updateEmployee) {
-      res.status(400).json({
-        error: "Failed to Update Employee",
-      });
-    } else if (rows1 === 1 && rows2 === 1 && rows3 === 1) {
-      res.status(200).json({
-        status: "Employee Succesfully Updated! ",
-      });
+    if (rows1 === 1 && rows2 === 1 && rows3 === 1) {
+      res.status(200).json({ status: "Employee Successfully Updated!" });
     } else {
       res.status(400).json({
-        status: "Update Incomplete!",
+        error: "Update Incomplete!",
+        details: {
+          employee_info: rows1,
+          employee_role: rows2,
+          employee: rows3,
+        },
       });
     }
   } catch (error) {
+    console.error("Controller error:", error.message, error.stack);
     res.status(400).json({
-      error: "Something went wrong!",
+      error: "Failed to update employee",
+      details: error.message,
     });
   }
 }
-
-
 
 
 async function deleteEmployee(req, res, next) {

@@ -224,57 +224,10 @@ async function getAllEmployees() {
     connection.release(); // release the connection back to the pool
   }
 }
-async function updateCustomer(customer) {
-  const conn = await connection.getConnection();
-  try {
-    await conn.beginTransaction();
-
-    const customer_id = customer.customer_id;
-    const customer_email = customer.customer_email ?? null;
-    const customer_phone_number = customer.customer_phone_number ?? null;
-    const customer_first_name = customer.customer_first_name ?? null;
-    const customer_last_name = customer.customer_last_name ?? null;
-    const active_customer_status = customer.active_customer_status ?? null;
-
-    const query1 = `
-      UPDATE customer_identifier
-      SET customer_email = ?, customer_phone_number = ?
-      WHERE customer_id = ?
-    `;
-
-    const query2 = `
-      UPDATE customer_info
-      SET customer_first_name = ?, customer_last_name = ?, active_customer_status = ?
-      WHERE customer_id = ?
-    `;
-
-    const [result1] = await conn.query(query1, [
-      customer_email,
-      customer_phone_number,
-      customer_id,
-    ]);
-
-    const [result2] = await conn.query(query2, [
-      customer_first_name,
-      customer_last_name,
-      active_customer_status,
-      customer_id,
-    ]);
-
-    await conn.commit();
-    return { result1, result2 };
-  } catch (error) {
-    await conn.rollback();
-    console.error("Error updating customer:", error);
-    throw new Error("Could not update customer. Please try again later.");
-  } finally {
-    conn.release();
-  }
-}
 
 async function updateEmployeeService(employee) {
+  const connection = await pool.getConnection();
   try {
-    // Check if all required fields are provided
     const {
       employee_id,
       employee_first_name,
@@ -289,48 +242,35 @@ async function updateEmployeeService(employee) {
       employee_id === undefined ||
       employee_first_name === undefined ||
       employee_last_name === undefined ||
-      employee_phone === undefined ||
       company_role_id === undefined ||
       employee_email === undefined ||
       active_employee === undefined
     ) {
-      throw new Error("One or more parameters are undefined.");
+      throw new Error("One or more required parameters are undefined.");
     }
 
-    // Log the input data
+    const phone = employee_phone || 'N/A'; // Default value if empty
     console.log("Updating employee with data:", employee);
 
     const query1 = `UPDATE employee_info SET employee_first_name = ?, employee_last_name = ?, employee_phone = ? WHERE employee_id = ?`;
-
     const query2 = `UPDATE employee_role SET company_role_id = ? WHERE employee_id = ?`;
-
     const query3 = `UPDATE employee SET employee_email = ?, active_employee = ? WHERE employee_id = ?`;
 
-    // for employee_info table
-    const rows1 = await connection.query(query1, [
+    const [rows1] = await connection.query(query1, [
       employee_first_name,
       employee_last_name,
-      employee_phone,
+      phone,
       employee_id,
     ]);
-
-    // for employee_role table
-    const rows2 = await connection.query(query2, [
-      company_role_id,
-      employee_id,
-    ]);
-
-    // for employee table
-    const rows3 = await connection.query(query3, [
-      employee_email,
-      active_employee,
-      employee_id,
-    ]);
+    const [rows2] = await connection.query(query2, [company_role_id, employee_id]);
+    const [rows3] = await connection.query(query3, [employee_email, active_employee, employee_id]);
 
     return { rows1, rows2, rows3 };
   } catch (error) {
-    console.log("Error updating employee:", error);
+    console.error("Error updating employee:", error.message);
     throw error;
+  } finally {
+    connection.release();
   }
 }
 
@@ -360,7 +300,6 @@ module.exports = {
   createEmployee,
   getEmployeeByEmail,
   getAllEmployees, 
-  updateCustomer,
   updateEmployeeService,
   getSingleEmployeeService,
   ERRORS
