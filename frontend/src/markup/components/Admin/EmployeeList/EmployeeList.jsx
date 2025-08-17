@@ -66,11 +66,17 @@ const EmployeesList = () => {
     }
   };
 
-  const handleToggle = () => {
-    setShowActiveEmployees(!showActiveEmployees);
+const handleToggle = async () => {
+  setShowActiveEmployees((prev) => {
+    const newShowActive = !prev;
+    const showInactive = !newShowActive;
+    // console.log('Before toggle - showInactive:', showInactive, 'showActiveEmployees:', prev);
     setCurrentPage(1);
-  };
-
+    // console.log('After toggle - showInactive:', showInactive, 'newShowActive:', newShowActive);
+    getAllEmployees(showInactive); // Remove async/await to avoid race condition
+    return newShowActive;
+  });
+};
   const handleSearch = (e) => {
     setSearchTerm(e.target.value);
   };
