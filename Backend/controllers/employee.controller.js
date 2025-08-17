@@ -1,7 +1,7 @@
 const { pool } = require('../config/db.config');
 const bcrypt = require('bcrypt');
 const xss = require('xss');
-const { getAllEmployees: getAllEmployeesService,  getSingleEmployeeService, updateEmployeeService } = require('../services/employee.service');
+const {  getAllEmployeesService,  getSingleEmployeeService, updateEmployeeService } = require('../services/employee.service');
 
 
 
@@ -140,8 +140,13 @@ async function getEmployeeByEmail(employee_email) {
 
 async function getAllEmployees(req, res, next) {
   try {
-    const employees = await getAllEmployeesService(); // call the service
+    // console.log('Full request:', req.originalUrl, req.query);
+    const showInactive = req.query.showInactive === 'true';
+    // console.log('Fetching employees, showInactive:', showInactive);
+    const employees = await getAllEmployeesService(showInactive);
+    // console.log('Employees fetched:', employees.length, employees);
     if (!employees || employees.length === 0) {
+      console.log('No employees found for showInactive:', showInactive);
       return res.status(404).json({ error: "No employees found!" });
     }
     return res.status(200).json({
@@ -149,8 +154,8 @@ async function getAllEmployees(req, res, next) {
       employees,
     });
   } catch (error) {
-    console.error("Error fetching employees:", error);
-    return res.status(500).json({ error: "Something went wrong!" });
+    console.error("Error fetching employees:", error.message, error.stack);
+    return res.status(500).json({ error: "Something went wrong!", details: error.message });
   }
 }
 async function updateEmployee(req, res, next) {

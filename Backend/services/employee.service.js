@@ -203,27 +203,36 @@ const createEmployee = async (employeeData) => {
     connection.release();
   }
 };
-async function getAllEmployees() {
-  const connection = await pool.getConnection(); // get a connection from the pool
+async function getAllEmployeesService(showInactive = false) {
+  const connection = await pool.getConnection();
   try {
-    const query = `
-      SELECT * 
-      FROM employee
-      INNER JOIN employee_info ON employee.employee_id = employee_info.employee_id
-      INNER JOIN employee_role ON employee.employee_id = employee_role.employee_id
-      INNER JOIN company_roles ON employee_role.company_role_id = company_roles.company_role_id
-      ORDER BY employee.active_employee DESC, employee_info.employee_first_name ASC
-      LIMIT 40
+    let query = `
+      SELECT e.*, ei.*, er.*, cr.*
+      FROM employee e
+      LEFT JOIN employee_info ei ON e.employee_id = ei.employee_id
+      LEFT JOIN employee_role er ON e.employee_id = er.employee_id
+      LEFT JOIN company_roles cr ON er.company_role_id = cr.company_role_id
     `;
+
+    if (!showInactive) {
+      query += ` WHERE e.active_employee = 1`;
+    } else {
+      query += ` WHERE e.active_employee = 0`;
+    }
+
+    query += ` ORDER BY ei.employee_first_name ASC`;
+
     const [rows] = await connection.query(query);
     return rows;
   } catch (error) {
-    console.error('Error fetching employees:', error);
+    console.error("Error in getAllEmployeesService:", error);
     throw error;
   } finally {
-    connection.release(); // release the connection back to the pool
+    connection.release();
   }
 }
+
+
 
 async function updateEmployeeService(employee) {
   const connection = await pool.getConnection();
@@ -299,7 +308,7 @@ module.exports = {
   checkIfCompanyRoleExists,
   createEmployee,
   getEmployeeByEmail,
-  getAllEmployees, 
+  getAllEmployeesService,
   updateEmployeeService,
   getSingleEmployeeService,
   ERRORS
