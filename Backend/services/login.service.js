@@ -13,7 +13,14 @@ async function logIn(employeeData) {
         statusCode: 404
       };
     }
-
+    //Check Active Status
+if (!employee.active_employee) {
+      return {
+        status: "fail",
+        message: "Your account is inactive. Please contact admin.",
+        statusCode: 403
+      };
+    }
     // Verify password
     const passwordMatch = await bcrypt.compare(
       employeeData.employee_password,

@@ -112,19 +112,20 @@ async function getSingleEmployeeService(employee) {
 // Get employee by email
 async function getEmployeeByEmail(employee_email) {
   const query = `
-    SELECT 
-      employee.employee_id,
-      employee.employee_email,
-      employee_info.employee_first_name,
-      employee_info.employee_last_name,
-      employee_pass.employee_password_hashed,
-      employee_role.company_role_id
-    FROM employee
-    INNER JOIN employee_info ON employee.employee_id = employee_info.employee_id
-    INNER JOIN employee_pass ON employee.employee_id = employee_pass.employee_id
-    INNER JOIN employee_role ON employee.employee_id = employee_role.employee_id
-    WHERE employee.employee_email = ?
-    LIMIT 1
+   SELECT 
+  employee.employee_id,
+  employee.employee_email,
+  employee.active_employee,          -- <--- add this
+  employee_info.employee_first_name,
+  employee_info.employee_last_name,
+  employee_pass.employee_password_hashed,
+  employee_role.company_role_id
+FROM employee
+INNER JOIN employee_info ON employee.employee_id = employee_info.employee_id
+INNER JOIN employee_pass ON employee.employee_id = employee_pass.employee_id
+INNER JOIN employee_role ON employee.employee_id = employee_role.employee_id
+WHERE employee.employee_email = ?
+LIMIT 1
   `;
 
   const [rows] = await pool.query(query, [employee_email]);
