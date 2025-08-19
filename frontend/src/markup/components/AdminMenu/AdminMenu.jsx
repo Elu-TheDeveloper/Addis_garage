@@ -10,10 +10,10 @@ const AdminMenu = () => {
             <a href='/admin' className='list-group-item'>Dashboard</a>
             <a href='admin/orders' className='list-group-item'>Orders</a>
             <a href='admin/order' className='list-group-item'>New Orders</a>
-            <a href='admin/add-employee' className='list-group-item'>Add Employee</a>
-            <a href='admin/employees' className='list-group-item'>Employee</a>
-            <a href='admin/add-customer' className='list-group-item'>Add Customer</a>
-            <a href='admin/customers' className='list-group-item'>Customers</a>
+            <a href='add-employee' className='list-group-item'>Add Employee</a>
+            <a href='employee' className='list-group-item'>Employee</a>
+            <a href='add-customer' className='list-group-item'>Add Customer</a>
+            <a href='customers' className='list-group-item'>Customers</a>
             <a href='admin/services' className='list-group-item'>Services</a>
         </div>
     </div>

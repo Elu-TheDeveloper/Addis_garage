@@ -24,6 +24,7 @@ import "./assets/styles/custom.css"
 import Header from "../src/markup/components/Header/Header"
 //footer
 import Footer from "../src/markup/components/Footer/Footer"
+import AdminDashBoard from './markup/components/Admin/AdminDashBoard/AdminDashBoard'
 function App() {
 
   return (
@@ -32,7 +33,6 @@ function App() {
   <Routes>
   <Route path="/" element = {<Home/>}/>
   <Route path="/Login" element ={<Login/>}/>
-  
   <Route path="/unauthorized" element ={<Unauthorized/>}/>
    <Route path="admin/employee" element ={<Employees/>}/>
    {/* <Route path="admin/add-employee" element ={<Addemployee/>}/> */}
@@ -48,6 +48,12 @@ function App() {
 <Route path="/admin/add-employee" element ={
   <PrivateAuthRoute roles ={[3]}>
 <Addemployee/>
+</PrivateAuthRoute>
+
+} />
+<Route path="/admin" element ={
+  <PrivateAuthRoute roles ={[3]}>
+<AdminDashBoard/>
 </PrivateAuthRoute>
 
 } />

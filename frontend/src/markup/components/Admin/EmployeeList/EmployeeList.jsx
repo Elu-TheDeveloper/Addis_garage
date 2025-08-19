@@ -18,29 +18,32 @@ const EmployeesList = () => {
   const employeesPerPage = 10;
   const { employee } = useAuth();
 
-  const getAllEmployees = async () => {
-    try {
-      const res = await employeeService.getAllEmployees(
-        employee.employee_token
-      );
-      if (res.status === 200) {
-        setEmployees(res.data.employees);
-      } else {
-        setApiError(true);
-        if (res.status === 401) {
-          setApiErrorMessage("Please login again");
-        } else if (res.status === 403) {
-          setApiErrorMessage("You are not authorized to view this page");
-        } else {
-          setApiErrorMessage("Please try again later");
-        }
-      }
-    } catch (err) {
-      console.error(err);
+ const getAllEmployees = async (showInactive = false) => {
+  try {
+    const res = await employeeService.getAllEmployees(
+      employee.employee_token,
+      showInactive
+    );
+
+    if (res.status === 200) {
+      setEmployees(res.data.employees);
+    } else {
       setApiError(true);
-      setApiErrorMessage("An error occurred while fetching the employees");
+      if (res.status === 401) {
+        setApiErrorMessage("Please login again");
+      } else if (res.status === 403) {
+        setApiErrorMessage("You are not authorized to view this page");
+      } else {
+        setApiErrorMessage("Please try again later");
+      }
     }
-  };
+  } catch (err) {
+    console.error(err);
+    setApiError(true);
+    setApiErrorMessage("An error occurred while fetching the employees");
+  }
+};
+
 
   useEffect(() => {
     getAllEmployees();
