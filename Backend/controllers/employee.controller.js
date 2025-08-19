@@ -140,15 +140,21 @@ async function getEmployeeByEmail(employee_email) {
 
 async function getAllEmployees(req, res, next) {
   try {
-    // console.log('Full request:', req.originalUrl, req.query);
     const showInactive = req.query.showInactive === 'true';
-    // console.log('Fetching employees, showInactive:', showInactive);
     const employees = await getAllEmployeesService(showInactive);
-    // console.log('Employees fetched:', employees.length, employees);
+
     if (!employees || employees.length === 0) {
-      console.log('No employees found for showInactive:', showInactive);
-      return res.status(404).json({ error: "No employees found!" });
+      const message = showInactive
+        ? "There are no inactive employees"
+        : "There are no employees";
+        
+      return res.status(200).json({
+        status: "success",
+        message,
+        employees: []
+      });
     }
+
     return res.status(200).json({
       status: "Employees retrieved successfully!",
       employees,
@@ -158,6 +164,7 @@ async function getAllEmployees(req, res, next) {
     return res.status(500).json({ error: "Something went wrong!", details: error.message });
   }
 }
+
 async function updateEmployee(req, res, next) {
   try {
     console.log("Incoming request headers:", req.headers);
