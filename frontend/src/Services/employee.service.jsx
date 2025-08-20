@@ -75,8 +75,7 @@ const updateEmployee = async (formData, loggedInEmployeeToken) => {
 
 
 
-// employee.service.jsx
-// employee.service.jsx
+
 export async function deleteEmployee(token, id) {
   try {
     const url = `${api_url}/api/employee/${id}`;
