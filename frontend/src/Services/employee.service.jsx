@@ -75,38 +75,34 @@ const updateEmployee = async (formData, loggedInEmployeeToken) => {
 
 
 
-async function deleteEmployee(loggedInEmployeeToken, id) {
+// employee.service.jsx
+// employee.service.jsx
+export async function deleteEmployee(token, id) {
   try {
     const url = `${api_url}/api/employee/${id}`;
     const response = await fetch(url, {
-      method: 'DELETE',
+      method: "DELETE",
       headers: {
-        "x-access-token": loggedInEmployeeToken,
+        "Authorization": `Bearer ${token}`,
         "Content-Type": "application/json",
       },
     });
 
-    // Check for HTTP errors
     if (!response.ok) {
       const text = await response.text();
       throw new Error(text || `HTTP error ${response.status}`);
     }
 
-    // Try parsing JSON, fallback to text
-    const contentType = response.headers.get("content-type");
-    let data;
-    if (contentType && contentType.includes("application/json")) {
-      data = await response.json();
-    } else {
-      data = { message: await response.text() };
-    }
-
+    const data = await response.json();
     return { success: true, data };
   } catch (error) {
     console.error("Error deleting employee:", error);
     return { success: false, error: error.message };
   }
 }
+
+
+
 
 
 

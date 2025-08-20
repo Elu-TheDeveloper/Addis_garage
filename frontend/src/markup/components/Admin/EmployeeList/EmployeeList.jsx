@@ -49,25 +49,21 @@ const EmployeesList = () => {
     getAllEmployees();
   }, [employee]);
 
-  const handleDelete = async () => {
-    try {
-      const res = await employeeService.deleteEmployee(
-        employee.employee_token,
-        employeeToDelete.employee_id
-      );
-      if (res.message === "Employee successfully deleted!") {
-        getAllEmployees();
-        setShowDeleteModal(false);
-      } else {
-        setApiError(true);
-        setApiErrorMessage("An error occurred while deleting the employee");
-      }
-    } catch (err) {
-      console.error(err);
-      setApiError(true);
-      setApiErrorMessage("An error occurred while deleting the employee");
-    }
-  };
+const handleDelete = async () => {
+  const token = employee.employee_token;
+  const id = employeeToDelete.employee_id;
+
+  const res = await employeeService.deleteEmployee(token, id);
+
+  if (res.success && res.data.message === "Employee successfully deleted!") {
+    getAllEmployees();
+    setShowDeleteModal(false);
+  } else {
+    setApiError(true);
+    setApiErrorMessage(res.error || res.data.status || "Failed to delete employee");
+  }
+};
+
 
 const handleToggle = async () => {
   setShowActiveEmployees((prev) => {
