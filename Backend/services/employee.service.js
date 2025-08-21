@@ -103,7 +103,7 @@ async function getSingleEmployeeService(employee) {
 
     const rows = await connection.query(query, [employee_id]);
 
-    return rows;
+    return rows; 
   } catch (error) {
     console.log(error);
   }
@@ -115,7 +115,7 @@ async function getEmployeeByEmail(employee_email) {
    SELECT 
   employee.employee_id,
   employee.employee_email,
-  employee.active_employee,          -- <--- add this
+  employee.active_employee,        
   employee_info.employee_first_name,
   employee_info.employee_last_name,
   employee_pass.employee_password_hashed,
@@ -284,6 +284,53 @@ async function updateEmployeeService(employee) {
   }
 }
 
+const deleteEmployeeService = async (employeeId) => {
+  const connection = await pool.getConnection();
+  try {
+    await connection.beginTransaction();
+
+    // Check if employee exists
+    const [rows] = await connection.query(
+      `SELECT employee_id FROM employee WHERE employee_id = ?`,
+      [employeeId]
+    );
+    if (rows.length === 0) {
+      throw new Error("Employee not found");
+    }
+
+    // Delete from related tables first (to avoid FK constraint issues)
+    await Promise.all([
+      connection.query(
+        `DELETE FROM employee_info WHERE employee_id = ?`,
+        [employeeId]
+      ),
+      connection.query(
+        `DELETE FROM employee_pass WHERE employee_id = ?`,
+        [employeeId]
+      ),
+      connection.query(
+        `DELETE FROM employee_role WHERE employee_id = ?`,
+        [employeeId]
+      )
+    ]);
+
+    // Finally, delete from employee table
+    const [deleteResult] = await connection.query(
+      `DELETE FROM employee WHERE employee_id = ?`,
+      [employeeId]
+    );
+
+    await connection.commit();
+
+    return deleteResult.affectedRows > 0; // true if deleted, false if not
+  } catch (error) {
+    await connection.rollback();
+    console.error("Employee deletion failed:", error.message);
+    throw error;
+  } finally {
+    connection.release();
+  }
+};
 
 
 
@@ -312,5 +359,6 @@ module.exports = {
   getAllEmployeesService,
   updateEmployeeService,
   getSingleEmployeeService,
+  deleteEmployeeService,
   ERRORS
 };

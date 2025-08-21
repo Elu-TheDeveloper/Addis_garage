@@ -111,7 +111,7 @@ async function updateCustomerController(req, res, next) {
 
     return res.status(200).json({
       status: "Customer successfully updated!",
-      updateResult,  // <-- send the object here
+      updateResult,  
     });
   } catch (error) {
     console.error("Update Customer Error:", error);

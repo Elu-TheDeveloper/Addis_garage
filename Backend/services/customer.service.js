@@ -1,16 +1,15 @@
-const bcrypt = require("bcrypt");
-const xss = require("xss"); 
-const { pool } = require('../config/db.config');
+import bcrypt from "bcrypt";
+import xss from "xss";
+import { pool } from "../config/db.config.js"; // Added .js extension
 
 // Check if customer exists
-async function checkIfCustomerExists(email) {
+export async function checkIfCustomerExists(email) {
   try {
     const sanitizedEmail = xss(email);
     const [rows] = await pool.query(
       "SELECT * FROM customer_identifier WHERE customer_email = ?",
       [sanitizedEmail]
     );
-    // Return true if customer exists, false otherwise
     return rows.length > 0;
   } catch (error) {
     console.error("Error checking customer existence:", error);
@@ -19,7 +18,7 @@ async function checkIfCustomerExists(email) {
 }
 
 // Create a new customer
-async function createCustomer(customer) {
+export async function createCustomer(customer) {
   let createdCustomer = {};
 
   try {
@@ -38,7 +37,7 @@ async function createCustomer(customer) {
 
       const [result] = await conn.query(
         `INSERT INTO customer_identifier (customer_email, customer_phone_number, customer_hash)
-         VALUES (?, ?, ?)` ,
+         VALUES (?, ?, ?)`,
         [sanitizedEmail, sanitizedPhone, hash_id]
       );
 
@@ -50,7 +49,7 @@ async function createCustomer(customer) {
 
       const [result2] = await conn.query(
         `INSERT INTO customer_info (customer_id, customer_first_name, customer_last_name, active_customer_status)
-         VALUES (?, ?, ?, ?)` ,
+         VALUES (?, ?, ?, ?)`,
         [customer_id, sanitizedFirstName, sanitizedLastName, sanitizedStatus]
       );
 
@@ -81,14 +80,14 @@ async function createCustomer(customer) {
 }
 
 // Get customer by email
-async function getCustomerByEmail(customer_email) {
+export async function getCustomerByEmail(customer_email) {
   try {
     const sanitizedEmail = xss(customer_email);
     const [rows] = await pool.query(
       `SELECT *
        FROM customer_identifier
        INNER JOIN customer_info ON customer_identifier.customer_id = customer_info.customer_id
-       WHERE customer_identifier.customer_email = ?` ,
+       WHERE customer_identifier.customer_email = ?`,
       [sanitizedEmail]
     );
     return rows;
@@ -99,14 +98,14 @@ async function getCustomerByEmail(customer_email) {
 }
 
 // Get single customer by ID
-async function getSingleCustomer(customer_id) {
+export async function getSingleCustomer(customer_id) {
   try {
     const sanitizedId = xss(customer_id);
     const [rows] = await pool.query(
       `SELECT *
        FROM customer_identifier
        INNER JOIN customer_info ON customer_identifier.customer_id = customer_info.customer_id
-       WHERE customer_identifier.customer_id = ?` ,
+       WHERE customer_identifier.customer_id = ?`,
       [sanitizedId]
     );
     return rows;
@@ -117,7 +116,7 @@ async function getSingleCustomer(customer_id) {
 }
 
 // Get all customers
-async function getAllCustomers(offset = 0) {
+export async function getAllCustomers(offset = 0) {
   try {
     const sanitizedOffset = Number(offset) || 0;
     const [rows] = await pool.query(
@@ -125,7 +124,7 @@ async function getAllCustomers(offset = 0) {
        FROM customer_identifier
        INNER JOIN customer_info ON customer_identifier.customer_id = customer_info.customer_id
        ORDER BY customer_info.customer_id DESC, customer_info.customer_first_name ASC
-       LIMIT 10 OFFSET ?` ,
+       LIMIT 10 OFFSET ?`,
       [sanitizedOffset]
     );
     return rows;
@@ -136,8 +135,7 @@ async function getAllCustomers(offset = 0) {
 }
 
 // Update customer by ID
-// Update customer by ID
-async function updateCustomer(customer) {
+export async function updateCustomer(customer) {
   try {
     const sanitizedId = xss(customer.customer_id);
     const sanitizedEmail = xss(customer.customer_email || "");
@@ -153,14 +151,14 @@ async function updateCustomer(customer) {
       const [result1] = await conn.query(
         `UPDATE customer_identifier
          SET customer_email = ?, customer_phone_number = ?
-         WHERE customer_id = ?` ,
+         WHERE customer_id = ?`,
         [sanitizedEmail, sanitizedPhone, sanitizedId]
       );
 
       const [result2] = await conn.query(
         `UPDATE customer_info
          SET customer_first_name = ?, customer_last_name = ?, active_customer_status = ?
-         WHERE customer_id = ?` ,
+         WHERE customer_id = ?`,
         [sanitizedFirstName, sanitizedLastName, sanitizedStatus, sanitizedId]
       );
 
@@ -168,7 +166,7 @@ async function updateCustomer(customer) {
 
       return {
         identifierRowsAffected: result1.affectedRows,
-        infoRowsAffected: result2.affectedRows
+        infoRowsAffected: result2.affectedRows,
       };
     } catch (err) {
       await conn.rollback();
@@ -182,9 +180,8 @@ async function updateCustomer(customer) {
   }
 }
 
-
 // Delete customer by ID
-async function deleteCustomer(customer_id) {
+export async function deleteCustomer(customer_id) {
   try {
     const sanitizedId = xss(customer_id);
     if (!sanitizedId) throw new Error("Customer ID is undefined");
@@ -211,7 +208,7 @@ async function deleteCustomer(customer_id) {
 }
 
 // Count total customers
-async function totalNumberOfCustomers() {
+export async function totalNumberOfCustomers() {
   try {
     const [result] = await pool.query(
       "SELECT COUNT(customer_id) AS num FROM customer_identifier"
@@ -224,7 +221,7 @@ async function totalNumberOfCustomers() {
 }
 
 // Search customers
-async function searchedCustomers(searchWord) {
+export async function searchedCustomers(searchWord) {
   try {
     const sanitizedWord = `%${xss(searchWord)}%`;
     const [rows] = await pool.query(
@@ -234,7 +231,7 @@ async function searchedCustomers(searchWord) {
        WHERE customer_identifier.customer_email LIKE ?
           OR customer_identifier.customer_phone_number LIKE ?
           OR customer_info.customer_first_name LIKE ?
-          OR customer_info.customer_last_name LIKE ?` ,
+          OR customer_info.customer_last_name LIKE ?`,
       [sanitizedWord, sanitizedWord, sanitizedWord, sanitizedWord]
     );
     return rows;
@@ -244,7 +241,7 @@ async function searchedCustomers(searchWord) {
   }
 }
 
-module.exports = {
+export default {
   checkIfCustomerExists,
   createCustomer,
   getCustomerByEmail,
@@ -253,5 +250,5 @@ module.exports = {
   updateCustomer,
   deleteCustomer,
   totalNumberOfCustomers,
-  searchedCustomers
+  searchedCustomers,
 };

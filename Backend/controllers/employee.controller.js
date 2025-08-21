@@ -1,7 +1,7 @@
 const { pool } = require('../config/db.config');
 const bcrypt = require('bcrypt');
 const xss = require('xss');
-const {  getAllEmployeesService,  getSingleEmployeeService, updateEmployeeService } = require('../services/employee.service');
+const {  getAllEmployeesService,  getSingleEmployeeService, updateEmployeeService,ServicedeleteEmployee } = require('../services/employee.service');
 
 
 
@@ -213,8 +213,9 @@ async function deleteEmployee(req, res, next) {
       });
     }
   } catch (error) {
+    console.error("Error deleting employee:", error);  // 👈 Add this
     res.status(400).json({
-      error: "Something went wrong!",
+      error: error.message || "Something went wrong!",
     });
   }
 }
