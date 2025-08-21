@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { BeatLoader } from "react-spinners";
 import { useParams, useNavigate } from "react-router-dom";
-import customerService from "../../../../services/customer.service"; // Verify this path
+import customerService from "../../../../services/customer.service"; // Adjust path based on structure
 import { useAuth } from "../../../../context/AuthContext";
 import classes from "./edit.module.css";
 
@@ -32,8 +32,7 @@ const EditCustomer = () => {
   const fetchData = async () => {
     try {
       console.log("customerService available methods:", Object.keys(customerService));
-      // Attempt to call the function, assuming it's part of the service
-      const response = await customerService.getSingleCustomer(customerId, token);
+      const response = await customerService.singleCustomer(customerId, token);
       console.log("Fetched customer data:", response);
 
       if (response && response.customer && response.customer.length > 0) {
@@ -95,6 +94,7 @@ const EditCustomer = () => {
       }
     } catch (error) {
       console.error("Update error:", error);
+      setApiError(true);
       setServerMsg("Update failed. Please try again.");
       setSpinner(false);
     }

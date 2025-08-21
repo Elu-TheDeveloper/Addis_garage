@@ -6,7 +6,7 @@ const createCustomer = async (formData, token) => {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`, // changed here
+      Authorization: `Bearer ${token}`, 
     },
     body: JSON.stringify(formData),
   });
@@ -45,6 +45,29 @@ const updateCustomer = async (formData, token) => {
   if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
   return response.json();
 };
+// src/services/customerService.js (partial update)
+export async function deleteCustomer(token, id) {
+  try {
+    const url = `${api_url}/api/customer/delete/${id}`; 
+    const response = await fetch(url, {
+      method: "DELETE",
+      headers: {
+        "Authorization": `Bearer ${token}`, 
+      },
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || data.status || `HTTP error ${response.status}`);
+    }
+
+    return { success: true, data };
+  } catch (error) {
+    console.error("Error deleting customer:", error.message);
+    return { success: false, error: error.message };
+  }
+}
 
 // GET - single customer
 const singleCustomer = async (ID, token) => {
@@ -100,4 +123,5 @@ export default {
   totalNofCustomers,
   searchedCustomers,
   searchCustomerVehicles,
+  deleteCustomer
 };
