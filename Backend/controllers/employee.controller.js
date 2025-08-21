@@ -1,7 +1,7 @@
 const { pool } = require('../config/db.config');
 const bcrypt = require('bcrypt');
 const xss = require('xss');
-const {  getAllEmployeesService,  getSingleEmployeeService, updateEmployeeService,ServicedeleteEmployee } = require('../services/employee.service');
+const {  getAllEmployeesService,  getSingleEmployeeService, updateEmployeeService,deleteEmployeeService} = require('../services/employee.service');
 
 
 
@@ -201,22 +201,16 @@ async function updateEmployee(req, res, next) {
 async function deleteEmployee(req, res, next) {
   const id = req.params.id;
   try {
-    const deleteEmployeeResult = await ServicedeleteEmployee(id);
+    const deleteEmployeeResult = await deleteEmployeeService(id);
 
     if (deleteEmployeeResult) {
-      res.status(200).json({
-        message: "Employee successfully deleted!",
-      });
+      res.status(200).json({ message: "Employee successfully deleted!" });
     } else {
-      res.status(400).json({
-        status: "Delete incomplete!",
-      });
+      res.status(400).json({ status: "Delete incomplete!" });
     }
   } catch (error) {
-    console.error("Error deleting employee:", error);  // 👈 Add this
-    res.status(400).json({
-      error: error.message || "Something went wrong!",
-    });
+    console.error("Error deleting employee:", error.message);
+    res.status(400).json({ error: error.message || "Something went wrong!" });
   }
 }
 async function getSingleEmployee(req, res, next) {

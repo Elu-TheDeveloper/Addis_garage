@@ -123,10 +123,6 @@ async function updateCustomerController(req, res, next) {
 }
 
 
-
-
-
-
 // Delete Customer controller
 async function deleteCustomerController(req, res, next) {
   try {
