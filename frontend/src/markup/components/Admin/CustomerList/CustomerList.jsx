@@ -1,14 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { CiSearch } from "react-icons/ci";
-import {
-  HiChevronDoubleRight,
-  HiMiniChevronDoubleLeft,
-  HiChevronRight,
-  HiChevronLeft,
-} from "react-icons/hi2";
+import { Table, Pagination, Modal, Button } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import { FaEdit } from "react-icons/fa";
 import { FiExternalLink } from "react-icons/fi";
+import { CiSearch } from "react-icons/ci";
+import { HiMiniChevronDoubleLeft, HiChevronLeft, HiChevronRight, HiChevronDoubleRight } from "react-icons/hi2";
 import { useAuth } from "../../../../context/AuthContext";
 import customerService from "../../../../services/customer.service";
 
@@ -18,6 +14,8 @@ const CustomerList = () => {
   const [search, setSearch] = useState([]);
   const [val, setValue] = useState("");
   const [customers, setCustomers] = useState([]);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [customerToDelete, setCustomerToDelete] = useState(null);
 
   const { employee } = useAuth();
   const token = employee?.employee_token;
@@ -48,14 +46,30 @@ const CustomerList = () => {
   };
 
   const First = () => setOffset(0);
-
   const Next = () => setOffset((prev) => Math.min(prev + 10, last - 10));
-
   const Previous = () => setOffset((prev) => Math.max(prev - 10, 0));
-
   const Last = () => {
     const res = last % 10;
     setOffset(res === 0 ? last - 10 : last - res);
+  };
+
+  const handleDelete = async () => {
+    const res = await customerService.deleteCustomer(token, customerToDelete.customer_id);
+    if (res.status === "Customer successfully deleted!") {
+      customersData();
+      setShowDeleteModal(false);
+    }
+    setCustomerToDelete(null);
+  };
+
+  const handleShowDeleteModal = (customer) => {
+    setCustomerToDelete(customer);
+    setShowDeleteModal(true);
+  };
+
+  const handleCloseDeleteModal = () => {
+    setCustomerToDelete(null);
+    setShowDeleteModal(false);
   };
 
   useEffect(() => {
@@ -71,90 +85,105 @@ const CustomerList = () => {
   }, [employee, token, offset]);
 
   return (
-    <div>
-      <div className="auto-container customer_list">
-        <div className="contact-section pad_1">
-          <div className="contact-title mb-1">
-            <h2>Customers</h2>
-          </div>
+    <section className="contact-section">
+      <div className="auto-container">
+        <div className="contact-title">
+          <h2>Customers</h2>
         </div>
-
-        <div className="search_customer ">
+        <div className="d-flex justify-content-between mb-3">
           <input
-            type="text"
-            className="w-100 form-control p-4"
+            type="search"
+            className="form-control w-50 w-md-25"
             placeholder="Search for customers using first name, last name, email address, or phone number"
-            onChange={(e) => setValue(e.target.value)}
             value={val}
+            onChange={(e) => setValue(e.target.value)}
           />
-          {/* Search button can be added here */}
         </div>
-
-        <div className="table-responsive rounded-3 ">
-          <table className="table table-striped table-bordered table-hover border ">
-            <thead className="table-dark">
+        <div className="table-responsive">
+          <Table responsive striped bordered hover className="modern-table border">
+            <thead>
               <tr>
-                <th scope="col" className="border">
-                  ID
-                </th>
+                <th>Active</th>
                 <th>First Name</th>
                 <th>Last Name</th>
                 <th>Email</th>
                 <th>Phone</th>
                 <th>Added Date</th>
-                <th>Active</th>
-                <th>Edit</th>
+                <th>Edit/Delete/View</th>
               </tr>
             </thead>
             <tbody>
               {(val ? search : customers).map((customer) => (
                 <tr key={customer.customer_id}>
-                  <td>{customer.customer_id}</td>
-                  <td className="customer_name">{customer.customer_first_name}</td>
-                  <td className="customer_name">{customer.customer_last_name}</td>
+                  <td className={customer.active_customer_status ? "text-success" : "text-danger"}>
+                    <h6 className="py-0 my-0 mx-3 font-weight-bold">
+                      {customer.active_customer_status ? "Yes" : "No"}
+                    </h6>
+                  </td>
+                  <td>{customer.customer_first_name}</td>
+                  <td>{customer.customer_last_name}</td>
                   <td>{customer.customer_email}</td>
                   <td>{customer.customer_phone_number}</td>
+                  <td>{customerService.formatDate(customer.customer_added_date)}</td>
                   <td>
-                    {customerService.formatDate(customer.customer_added_date)}
-                  </td>
-                  <td>{customer.active_customer_status ? "Yes" : "No"}</td>
-                  <td>
-                    <Link
-                      to={`/admin/edit-customer/${customer.customer_id}`}
-                      className="editButton"
-                    >
-                      <FaEdit className="px-1 svg" size={28} />
-                    </Link>
-                    <Link
-                      to={`/admin/customers/${customer.customer_id}`}
-                      className="editButton"
-                    >
-                      <FiExternalLink className="px-1" size={28} />
-                    </Link>
+                    <div className="action-icons">
+                      <Link to={`/admin/edit-customer/${customer.customer_id}`} state={{ customer }}>
+                        <FaEdit title="Edit" />
+                      </Link>
+                      <Link to={`/admin/customers/${customer.customer_id}`} state={{ customer }}>
+                        <FiExternalLink title="View" />
+                      </Link>
+                      <Link onClick={() => handleShowDeleteModal(customer)}>
+                        <i className="fas fa-trash-alt danger" title="Delete"></i>
+                      </Link>
+                    </div>
                   </td>
                 </tr>
               ))}
             </tbody>
-          </table>
+          </Table>
         </div>
-
-        <div className="text-center btns">
-          <button onClick={First} disabled={offset === 0}>
-            <HiMiniChevronDoubleLeft /> <span>First</span>
-          </button>
-          <button onClick={Previous} disabled={offset === 0}>
-            <HiChevronLeft />
-            <span>Previous</span>
-          </button>
-          <button onClick={Next} disabled={offset >= last - 10}>
-            <HiChevronRight /> <span> Next</span>
-          </button>
-          <button onClick={Last} disabled={offset >= last - 10}>
-            <span>Last</span> <HiChevronDoubleRight />
-          </button>
-        </div>
+        <Pagination className="justify-content-center custom-pagination">
+          <Pagination.Prev onClick={Previous} disabled={offset === 0} />
+          <Pagination.Item onClick={First} disabled={offset === 0}>
+            <HiMiniChevronDoubleLeft /> First
+          </Pagination.Item>
+          <Pagination.Item onClick={Previous} disabled={offset === 0}>
+            <HiChevronLeft /> Previous
+          </Pagination.Item>
+          <Pagination.Item onClick={Next} disabled={offset >= last - 10}>
+            <HiChevronRight /> Next
+          </Pagination.Item>
+          <Pagination.Item onClick={Last} disabled={offset >= last - 10}>
+            Last <HiChevronDoubleRight />
+          </Pagination.Item>
+          <Pagination.Next onClick={Next} disabled={offset >= last - 10} />
+        </Pagination>
       </div>
-    </div>
+
+      <Modal show={showDeleteModal} onHide={handleCloseDeleteModal} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Confirm Deletion</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          Are you sure you want to delete{" "}
+          <strong>
+            {customerToDelete
+              ? `${customerToDelete.customer_first_name} ${customerToDelete.customer_last_name}`
+              : ""}
+          </strong>
+          ?
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleCloseDeleteModal}>
+            Cancel
+          </Button>
+          <Button variant="danger" onClick={handleDelete}>
+            Delete
+          </Button>
+        </Modal.Footer>
+      </Modal>
+    </section>
   );
 };
 

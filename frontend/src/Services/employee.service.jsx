@@ -87,18 +87,19 @@ export async function deleteEmployee(token, id) {
       },
     });
 
+    const data = await response.json(); // Always try to parse JSON
+
     if (!response.ok) {
-      const text = await response.text();
-      throw new Error(text || `HTTP error ${response.status}`);
+      throw new Error(data.error || data.status || `HTTP error ${response.status}`);
     }
 
-    const data = await response.json();
     return { success: true, data };
   } catch (error) {
-    console.error("Error deleting employee:", error);
+    console.error("Error deleting employee:", error.message);
     return { success: false, error: error.message };
   }
 }
+
 
 
 
