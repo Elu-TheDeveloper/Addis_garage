@@ -72,7 +72,30 @@ const updateEmployee = async (formData, loggedInEmployeeToken) => {
 };
 
 
-
+const getSingleEmployee = async (id, loggedInEmployeeToken) => {
+  try {
+    if (!loggedInEmployeeToken) {
+      throw new Error("No authentication token provided");
+    }
+    console.log("Sending request with token:", loggedInEmployeeToken);
+    const response = await fetch(`${api_url}/api/employee/${id}`, {
+      method: "GET",
+      headers: {
+        "Authorization": `Bearer ${loggedInEmployeeToken}`,
+      },
+    });
+    console.log("Response status:", response.status);
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(`HTTP error! status: ${response.status}, message: ${errorData.message || "Unknown error"}`);
+    }
+    const data = await response.json();
+    return { status: response.status, data };
+  } catch (error) {
+    console.error("Failed to get singleEmployee", error);
+    return { status: error.status || 500, data: { message: error.message || "Failed to get singleEmployee" } };
+  }
+};
 
 
 
@@ -110,4 +133,4 @@ export async function deleteEmployee(token, id) {
 
 
 
-export default  {createEmployee,getAllEmployees,deleteEmployee,updateEmployee}
+export default  {createEmployee,getAllEmployees,deleteEmployee,updateEmployee,getSingleEmployee}
