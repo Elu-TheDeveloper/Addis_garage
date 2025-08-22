@@ -10,7 +10,6 @@ function sanitize(value) {
   return typeof value === 'string' ? xss(value.trim()) : value;
 }
 
-// Check if employee exists by email
 
 // Check if company role ID exists
 async function checkIfCompanyRoleExists(company_role_id) {

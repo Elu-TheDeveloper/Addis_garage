@@ -6,6 +6,7 @@ const installRouter = require('./install.routes');
 const employeeRouter = require('./employee.routes');
 const loginRoutes = require('./login.routes');
 const customerRoute = require('./customer.routes');
+const vehicleRoutes = require('./vehicle.routes')
 
 // Add JSON parsing middleware FIRST
 router.use(express.json());
@@ -23,6 +24,7 @@ router.use(installRouter);
 router.use(employeeRouter);
 router.use(loginRoutes);
 router.use(customerRoute);
+router.use(vehicleRoutes);
 
 // 404 Handler (catches all unhandled routes)
 router.use((req, res) => {
