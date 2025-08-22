@@ -8,5 +8,5 @@ router.post('/api/employee', authMiddleware.verifyToken, authMiddleware.isAdmin,
 router.get('/api/employee', authMiddleware.verifyToken, authMiddleware.isAdmin, employeeController.getAllEmployees);
 router.delete('/api/employee/:id', authMiddleware.verifyToken, authMiddleware.isAdmin, employeeController.deleteEmployee);
 router.put('/api/employee/update', authMiddleware.verifyToken, authMiddleware.isAdmin, employeeController.updateEmployee);
-
+router.get('/api/employee/:id' ,authMiddleware.verifyToken, authMiddleware.isAdmin,employeeController.getSingleEmployee)
 module.exports = router;

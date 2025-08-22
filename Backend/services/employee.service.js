@@ -94,20 +94,33 @@ const checkIfCompanyRoleExists = async (roleId) => {
     connection.release();
   }
 };
+
 async function getSingleEmployeeService(employee) {
   try {
     const employee_id = employee;
 
     const query =
-      "SELECT * FROM employee INNER JOIN employee_info ON employee.employee_id = employee_info.employee_id INNER JOIN employee_role ON employee.employee_id = employee_role.employee_id INNER JOIN company_roles ON employee_role.company_role_id = company_roles.company_role_id WHERE employee.employee_id = ?";
+      "SELECT * FROM employee " +
+      "INNER JOIN employee_info ON employee.employee_id = employee_info.employee_id " +
+      "INNER JOIN employee_role ON employee.employee_id = employee_role.employee_id " +
+      "INNER JOIN company_roles ON employee_role.company_role_id = company_roles.company_role_id " +
+      "WHERE employee.employee_id = ?";
 
-    const rows = await connection.query(query, [employee_id]);
+    console.log("Executing query for employee_id:", employee_id); // Debug log
+    const [rows] = await pool.execute(query, [employee_id]); // Use pool.execute
+    console.log("Query result:", rows); // Debug log
 
-    return rows; 
+    if (!rows || rows.length === 0) {
+      throw new Error("No employee found with the given ID");
+    }
+
+    return rows;
   } catch (error) {
-    console.log(error);
+    console.error("Database error in getSingleEmployeeService:", error); // Improved logging
+    throw error; // Propagate error to controller
   }
 }
+
 
 // Get employee by email
 async function getEmployeeByEmail(employee_email) {
@@ -360,5 +373,6 @@ module.exports = {
   updateEmployeeService,
   getSingleEmployeeService,
   deleteEmployeeService,
+  getSingleEmployeeService,
   ERRORS
 };
