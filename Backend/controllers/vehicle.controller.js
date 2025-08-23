@@ -1,4 +1,4 @@
-const vehicleService = require('../services/vehicle.service')
+const {vehicleService,singleVehicleService} = require('../services/vehicle.service')
 
 async function addVehicle(req, res) {
   try {
@@ -32,7 +32,37 @@ async function addVehicle(req, res) {
     });
   }
 }
+async function singleVehicle(req, res) {
+  try {
+    const { id } = req.params;
+
+    const result = await singleVehicleService(id); 
+
+    if (!result || result.length === 0) {
+      return res.status(404).json({
+        status: "fail",
+        message: "Vehicle does not exist",
+        data: []
+      });
+    }
+
+    return res.status(200).json({
+      status: "success",
+      data: result
+    });
+
+  } catch (error) {
+    console.error("Server Error:", error);
+    return res.status(500).json({
+      status: "error",
+      message: "Server Error"
+    });
+  }
+}
+
+
 
 module.exports={
-    addVehicle
+    addVehicle,
+    singleVehicle
 }

@@ -74,15 +74,34 @@ async function addVehicle(vehicleData) {
   return response;
 }
 
+async function singleVehicleService(ID) {
+    try {
+        const singleVehicleQuery = `
+            SELECT customer_identifier.*, customer_info.*, customer_vehicle_info.* 
+            FROM customer_identifier 
+            INNER JOIN customer_info 
+                ON customer_identifier.customer_id = customer_info.customer_id
+            INNER JOIN customer_vehicle_info 
+                ON customer_identifier.customer_id = customer_vehicle_info.customer_id
+            WHERE customer_vehicle_info.vehicle_id = ?
+        `;
 
+        // console.log("Vehicle ID:", ID);
 
+        // Destructure rows from mysql2/promise query
+        const [rows] = await pool.query(singleVehicleQuery, [ID]);
 
-
-
+        return rows;
+    } catch (error) {
+        console.error("Error getting vehicle:", error);
+        throw new Error("Could not get vehicle. Please try again later.");
+    }
+}
 
 
 
 module.exports = {
   addVehicle,
+  singleVehicleService
  
 };

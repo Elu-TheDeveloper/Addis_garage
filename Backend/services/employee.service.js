@@ -116,8 +116,8 @@ async function getSingleEmployeeService(employee) {
 
     return rows;
   } catch (error) {
-    console.error("Database error in getSingleEmployeeService:", error); // Improved logging
-    throw error; // Propagate error to controller
+    console.error("Database error in getSingleEmployeeService:", error); 
+    throw error; 
   }
 }
 
@@ -373,6 +373,5 @@ module.exports = {
   updateEmployeeService,
   getSingleEmployeeService,
   deleteEmployeeService,
-  getSingleEmployeeService,
   ERRORS
 };
