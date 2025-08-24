@@ -1,9 +1,10 @@
-const pool = require("../config/db.config");
+const pool = require('../config/db.config'); // Adjust path to your database config
+
 async function addVehicle(vehicleData) {
   let response = {
-    status: "fail",
+    status: 'fail',
     success: false,
-    message: "failed to add vehicle",
+    message: 'failed to add vehicle',
   };
 
   const {
@@ -18,7 +19,6 @@ async function addVehicle(vehicleData) {
     vehicle_color,
   } = vehicleData;
 
-  // Validate required fields
   if (
     !customer_id ||
     !vehicle_year ||
@@ -30,7 +30,7 @@ async function addVehicle(vehicleData) {
     !vehicle_serial ||
     !vehicle_color
   ) {
-    response.message = "Missing or invalid required fields";
+    response.message = 'Missing or invalid required fields';
     return response;
   }
 
@@ -52,27 +52,26 @@ async function addVehicle(vehicleData) {
       vehicle_serial,
       vehicle_color,
     ]);
-
-    console.log("Insert result:", result);
-
+    
     if (result.affectedRows > 0) {
       response = {
-        status: "success",
+        status: 'success',
         success: true,
-        message: "Vehicle added successfully",
+        message: 'Vehicle added successfully',
         insertId: result.insertId,
       };
     } else {
-      response.message = "No rows affected, vehicle not added";
+      response.message = 'No rows affected, vehicle not added';
     }
   } catch (error) {
-    console.error("Database error adding vehicle:", error);
+    console.error('Database error adding vehicle:', error);
     response.message = `Internal Server Error: ${error.message}`;
   }
 
-  console.log("Response:", response);
+  console.log('Response:', response);
   return response;
 }
+
 
 async function singleVehicleService(ID) {
     try {
@@ -101,7 +100,6 @@ async function singleVehicleService(ID) {
 
 
 module.exports = {
-  addVehicle,
+  vehicleService: { addVehicle },   // 👈 wrap inside vehicleService
   singleVehicleService
- 
 };
