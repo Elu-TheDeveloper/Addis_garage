@@ -40,9 +40,98 @@ async function singleVehicle(req, res) {
   }
 }
 
+async function updateVehicle(req, res) {
+    try {
+        const updateVehicleData = req.body;
+  
 
+        const result = await vehicleService.updateVehicleInfo(updateVehicleData);
+
+        if (result.error) {
+            return res.status(500).json({
+                status: "error",
+                success: false,
+                message: result.error,
+                details: result.details
+            });
+        }
+
+        if (!result.status) {
+            return res.status(400).json({
+                status: "fail",
+                success: false,
+                message: "Failed to update vehicle info"
+            });
+        }
+
+        return res.status(200).json({
+            status: "success",
+            success: true,
+            data: result
+        });
+
+    } catch (error) {
+        console.error('Unexpected server error:', error);
+        return res.status(500).json({
+            message: 'Server Error'
+        });
+    }
+}
+async function vehiclePerCustomer(req,res){
+
+    try {
+
+        const { customer_id }=req.params;
+        const ID = customer_id
+
+        const result = await vehicleService.vehiclePerCustomer(ID);
+        // console.log(result)
+
+        if(result){
+
+            res.status(200).json(result)
+        } else{
+
+            res.status(400).json({message:'not found '})
+        }
+
+    
+    } catch (error) {
+        return res.status(500).json({
+            message:'Server Error'
+        })
+    }
+}
+async function vehiclePerCustomer(req,res){
+
+    try {
+
+        const { customer_id }=req.params;
+        const ID = customer_id
+
+        const result = await vehicleService.vehiclePerCustomer(ID);
+        // console.log(result)
+
+        if(result){
+
+            res.status(200).json(result)
+        } else{
+
+            res.status(400).json({message:'not found '})
+        }
+
+    
+    } catch (error) {
+        return res.status(500).json({
+            message:'Server Error'
+        })
+    }
+}
 
 module.exports={
     addVehicle,
     singleVehicle,
+    updateVehicle,
+    vehiclePerCustomer
+
 }
