@@ -77,6 +77,8 @@ async function updateVehicle(req, res) {
         });
     }
 }
+
+
 async function vehiclePerCustomer(req,res){
 
     try {
@@ -85,7 +87,7 @@ async function vehiclePerCustomer(req,res){
         const ID = customer_id
 
         const result = await vehicleService.vehiclePerCustomer(ID);
-        // console.log(result)
+     
 
         if(result){
 
@@ -102,14 +104,14 @@ async function vehiclePerCustomer(req,res){
         })
     }
 }
-async function vehiclePerCustomer(req,res){
+async function hasServiceOrder(req,res){
 
     try {
 
-        const { customer_id }=req.params;
-        const ID = customer_id
+        const { vehicle_id }=req.params;
+        const ID = vehicle_id
 
-        const result = await vehicleService.vehiclePerCustomer(ID);
+        const result = await vehicleService.hasServiceOrder(ID);
         // console.log(result)
 
         if(result){
@@ -132,6 +134,7 @@ module.exports={
     addVehicle,
     singleVehicle,
     updateVehicle,
-    vehiclePerCustomer
+    vehiclePerCustomer,
+    hasServiceOrder
 
 }

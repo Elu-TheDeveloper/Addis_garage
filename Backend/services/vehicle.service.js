@@ -185,10 +185,35 @@ async function vehiclePerCustomer(ID){
 
     
 }
+async function hasServiceOrder(ID){
+    try {
+        console.log("vehicle_id",ID)
+        let response={}
+        const query = `SELECT * FROM orders WHERE vehicle_id = ?`
+        const result = await pool.query(query,[ID]);
+        console.log(result,result.length)
 
+        if(result.length == 0){
+            return response;
+        }
+
+        response ={
+            
+            result
+        }
+        // console.log(response)
+
+        return response;
+        
+        
+    } catch (error) {
+        console.error("Error getting Vehicle:", error);
+        throw new Error("Could not get vehicle. Please try again later.");
+    }
+}
 
 module.exports = {
-  vehicleService: { addVehicle,  updateVehicleInfo, vehiclePerCustomer },
+  vehicleService: { addVehicle,  updateVehicleInfo, vehiclePerCustomer,hasServiceOrder },
   singleVehicleService,
 
 };

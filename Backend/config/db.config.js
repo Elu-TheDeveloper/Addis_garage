@@ -10,7 +10,15 @@ const dbConfig = {
 };
 
 const pool = mysql.createPool(dbConfig);
-
+(async () => {
+  try {
+    const connection = await pool.getConnection();
+    console.log('Database connected successfully');
+    connection.release()
+  } catch (err) {
+    console.error('Failed to connect to the database:', err.message);
+  }
+})();
 
 async function query(sql, params) {
   const [rows] = await pool.execute(sql, params);

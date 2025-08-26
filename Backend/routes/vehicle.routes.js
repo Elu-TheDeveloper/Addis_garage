@@ -5,5 +5,6 @@ const router = express.Router();
 router.post('/api/vehicle',authMiddleware.verifyToken,vehicleController.addVehicle)
 router.get('/api/vehicle/:id',authMiddleware.verifyToken, vehicleController.singleVehicle)
 router.put('/api/vehicle/update',authMiddleware.verifyToken, vehicleController.updateVehicle)
-router.get('/api/vehicles/:customer_id',authMiddleware.verifyToken,vehicleController.vehiclePerCustomer)
+router.get('/api/vehicle/:customer_id',authMiddleware.verifyToken,vehicleController.vehiclePerCustomer)
+router.get('/api/vehicle_order/:vehicle_id',authMiddleware.verifyToken ,vehicleController.hasServiceOrder)
 module.exports =router
