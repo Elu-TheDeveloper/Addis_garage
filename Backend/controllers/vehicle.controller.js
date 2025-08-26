@@ -123,10 +123,31 @@ async function deleteVehicle(req, res) {
     }
   }
 
-;
+async function searchVehicle(req, res) {
+  try {
+    const { customer_id } = req.params;
+    const { query } = req.query; // Get the search query from request query parameters
 
+    // Perform the search in the vehicleService
+    const result = await vehicleService.searchVehicle(customer_id, query);
 
+    if (result?.length === 0) {
+      return res.status(404).json({
+        status: "fail",
+        message: "No vehicles found",
+        data: [],
+      });
+    }
+   console.log(result)
+   return res.status(200).json(result);
 
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      message: "Server Error",
+    });
+  }
+}
 async function hasServiceOrder(req,res){
 
     try {
@@ -152,11 +173,14 @@ async function hasServiceOrder(req,res){
     }
 }
 
+
+
 module.exports={
     addVehicle,
     singleVehicle,
     updateVehicle,
     deleteVehicle,
+    searchVehicle,
     vehiclePerCustomer,
     hasServiceOrder
 
