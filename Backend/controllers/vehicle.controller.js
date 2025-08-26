@@ -104,6 +104,29 @@ async function vehiclePerCustomer(req,res){
         })
     }
 }
+
+async function deleteVehicle(req, res) {
+    const {vehicle_id}=req.params
+   
+    try {
+        const result = await vehicleService.deleteVehicle(vehicle_id );
+  
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ msg: " there is no vehicle found with this id " });
+        }
+  console.log("The Vehicle has been deleted")
+        return res.status(200).json({ msg: "The vehicle has been deleted" });
+
+    } catch (error) {
+        console.error("Error deleting service:", error.message);
+        return res.status(500).json({ msg: "Something went wrong" });
+    }
+  }
+
+;
+
+
+
 async function hasServiceOrder(req,res){
 
     try {
@@ -112,8 +135,7 @@ async function hasServiceOrder(req,res){
         const ID = vehicle_id
 
         const result = await vehicleService.hasServiceOrder(ID);
-        // console.log(result)
-
+   
         if(result){
 
             res.status(200).json(result)
@@ -134,6 +156,7 @@ module.exports={
     addVehicle,
     singleVehicle,
     updateVehicle,
+    deleteVehicle,
     vehiclePerCustomer,
     hasServiceOrder
 

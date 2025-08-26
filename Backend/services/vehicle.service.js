@@ -156,6 +156,19 @@ async function updateVehicleInfo(updateVehicleData) {
 
     return response;
 }
+
+async function deleteVehicle(vehicle_id) {
+    try {
+      const result = await pool.query(
+        "DELETE FROM customer_vehicle_info WHERE vehicle_id = ?",
+        [ vehicle_id]
+      );
+  
+      return result;
+    } catch (error) {
+      throw new Error("Error Deleting service: " + error.message);
+    }
+  }
 async function vehiclePerCustomer(ID){
 
 
@@ -213,7 +226,7 @@ async function hasServiceOrder(ID){
 }
 
 module.exports = {
-  vehicleService: { addVehicle,  updateVehicleInfo, vehiclePerCustomer,hasServiceOrder },
+  vehicleService: { addVehicle,  updateVehicleInfo, vehiclePerCustomer,hasServiceOrder,deleteVehicle },
   singleVehicleService,
 
 };

@@ -7,4 +7,7 @@ router.get('/api/vehicle/:id',authMiddleware.verifyToken, vehicleController.sing
 router.put('/api/vehicle/update',authMiddleware.verifyToken, vehicleController.updateVehicle)
 router.get('/api/vehicle/:customer_id',authMiddleware.verifyToken,vehicleController.vehiclePerCustomer)
 router.get('/api/vehicle_order/:vehicle_id',authMiddleware.verifyToken ,vehicleController.hasServiceOrder)
+router.delete('/api/deleteVehicle/:vehicle_id', authMiddleware.verifyToken, authMiddleware.isAdmin ,vehicleController.deleteVehicle,
+vehicleController.deleteVehicle);
+
 module.exports =router
