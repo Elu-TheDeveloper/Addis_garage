@@ -42,10 +42,20 @@ async function deleteService(service_id) {
     throw new Error("Error Deleting service: " + error.message);
   }
 }
+async function getSingleService(service_id) {
+  try {
+    const sql = `SELECT * FROM common_services WHERE service_id = ?`;
+    const result = await pool.query(sql, [service_id]);
+    return result;
+  } catch (error) {
+    console.error("Error getting single service:", error);
+    throw new Error("Could not get service. Please try again later.");
+  }
+}
 async function getAllServices() {
   try {
     const sql = `SELECT * FROM common_services`;
-    const [rows] = await pool.query(sql); // use array destructuring
+    const [rows] = await pool.query(sql);
     return rows;
   } catch (error) {
     console.error("Error getting services:", error);
@@ -57,5 +67,7 @@ module.exports ={
     createService,
     updateService,
     deleteService,
+    getSingleService,
     getAllServices
+
 }

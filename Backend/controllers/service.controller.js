@@ -27,10 +27,6 @@ async function updateService(req, res) {
     const {id}=req.params
     const service_id =id
    
-    // console.log("service_id ===>", service_id);
-    console.log("service_name ===>", service_name);
-    console.log("service_description ===>", service_description);
-
     if (!service_name || !service_description) {
         return res.status(400).json({ msg: "Invalid input" });
     }
@@ -66,6 +62,23 @@ async function deleteService(req, res) {
       return res.status(500).json({ msg: "Something went wrong" });
   }
 }
+async function getSingleService(req, res, next) {
+  try {
+    const serviceId = req.params.id;
+    const service = await serviceService.getSingleService(serviceId);
+    res.status(200).json({
+      status: 'success',
+      data: service, 
+      
+    });
+  } catch (error) {
+    console.error('Error getting single service:', error);
+    res.status(400).json({
+      status: 'error',
+      message: error.message,
+    });
+  }
+}
 async function getAllServices(req, res) {
   try {
     const services = await serviceService.getAllServices();
@@ -90,6 +103,7 @@ module.exports={
 createService,
 updateService,
 deleteService,
+getSingleService,
 getAllServices
 }
 
