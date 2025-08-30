@@ -7,7 +7,7 @@ const employeeRouter = require('./employee.routes');
 const loginRoutes = require('./login.routes');
 const customerRoute = require('./customer.routes');
 const vehicleRoutes = require('./vehicle.routes')
-
+const serviceRoutes = require('./service.routes')
 // Add JSON parsing middleware FIRST
 router.use(express.json());
 
@@ -25,7 +25,7 @@ router.use(employeeRouter);
 router.use(loginRoutes);
 router.use(customerRoute);
 router.use(vehicleRoutes);
-
+router.use(serviceRoutes)
 // 404 Handler (catches all unhandled routes)
 router.use((req, res) => {
   res.status(404).json({

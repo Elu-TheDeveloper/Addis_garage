@@ -255,7 +255,12 @@ async function searchVehicle(customer_id, query) {
   }
 }
 module.exports = {
-  vehicleService: { addVehicle,  updateVehicleInfo, vehiclePerCustomer,hasServiceOrder,deleteVehicle,searchVehicle },
+  vehicleService: { addVehicle,  
+    updateVehicleInfo,
+     vehiclePerCustomer,
+     hasServiceOrder,
+     deleteVehicle,
+     searchVehicle },
   singleVehicleService,
 
 };
