@@ -348,6 +348,97 @@ WHERE orders.order_hash = ?;
     throw new Error("An error occurred while retrieving the order");
   }
 }
+
+async function getOrderById(id) {
+  try {
+    // Query to get order details
+    const orderQuery = `SELECT * FROM orders WHERE order_hash = ?`;
+    const orderResult = await pool.query(orderQuery, [id]);
+    if (orderResult.length === 0) {
+      return null; // No order found
+    }
+
+    const order = orderResult;
+    // Query to get associated services
+    console.log("order", order[0].order_id);
+
+    const OrderID = order[0].order_id;
+
+    const servicesQuery = `
+      SELECT * FROM order_services
+      WHERE order_id = ?
+    `;
+    const servicesResult = await pool.query(servicesQuery, [OrderID]);
+    console.log("serial", servicesResult);
+    order[0].order_services = servicesResult || [];
+    console.log("last ", order);
+
+    const orderInfoQuery = `
+    SELECT estimated_completion_date, completion_date FROM order_info
+    WHERE order_id = ?
+  `;
+    const orderInfoResult = await pool.query(orderInfoQuery, [OrderID]);
+    // console.log("ser",servicesResult)
+    order[0].estimated_completion_date =
+      orderInfoResult[0].estimated_completion_date || "";
+    order[0].completion_date = orderInfoResult[0].completion_date || "";
+    // order.push(servicesResult)
+    console.log("info_result ", orderInfoResult);
+
+    const orderStatusQuery = `
+  SELECT order_status FROM order_status
+  WHERE order_id = ?
+`;
+    const orderStatusResult = await pool.query(orderStatusQuery, [OrderID]);
+    console.log("orderstatus", orderStatusResult);
+    order[0].order_status = orderStatusResult[0]?.order_status;
+
+    return order;
+  } catch (error) {
+    console.error(`Error fetching order with ID ${id}:`, error);
+    throw new Error("An error occurred while retrieving the order");
+  }
+}
+
+async function getOrderByCustomerId(id) {
+  try {
+    // Query to get order details
+    const orderQuery = `SELECT 
+    orders.order_date, 
+    orders.order_hash, 
+    orders.active_order, 
+    order_info.order_total_price, 
+    order_info.estimated_completion_date, 
+    employee_info.employee_first_name, 
+    employee_info.employee_last_name, 
+    customer_vehicle_info.vehicle_make, 
+    customer_vehicle_info.vehicle_serial, 
+    common_services.service_name,
+    common_services.service_description
+FROM 
+    orders
+INNER JOIN 
+    order_info ON orders.order_id = order_info.order_id
+INNER JOIN 
+    employee_info ON orders.employee_id = employee_info.employee_id
+INNER JOIN 
+    customer_vehicle_info ON orders.customer_id = customer_vehicle_info.customer_id
+INNER JOIN 
+    order_services ON orders.order_id = order_services.order_id
+INNER JOIN 
+    common_services ON order_services.service_id = common_services.service_id
+WHERE 
+    orders.customer_id = ?;
+`;
+    const orderResult = await pool.query(orderQuery, [id]);
+
+    return orderResult;
+  } catch (error) {
+    console.error(`Error fetching order with ID ${id}:`, error);
+    throw new Error("An error occurred while retrieving the order");
+  }
+}
+
 module.exports ={
 checkCustomerExists,
 checkVehicle,
@@ -355,5 +446,8 @@ checkEmployeeExists,
 checkService,
 createOrders,
 getAllOrders,
-getOrderDetailById
+getOrderDetailById,
+getOrderById,
+getOrderByCustomerId
+
 }

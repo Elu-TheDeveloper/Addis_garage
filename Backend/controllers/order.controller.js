@@ -75,12 +75,72 @@ async function getOrderDetailById(req, res) {
   }
 }
 
-
+// Get single order by CUSTOMER_ID
+async function getOrderByCustomerId(req, res) {
+  try {
+    const { customerid } = req.params;
+    const order = await orderService.getOrderByCustomerId(customerid);
+    
+    if (!order) {
+      return res.status(404).json({ msg: "Order not found" });
+    }
+    res.status(200).json(order);
+  } catch (error) {
+    res
+      .status(500)
+      .json({ error: "An error occurred while retrieving the order" });
+  }
+}
 //Get Orders By ID
+async function getOrderById(req, res) {
+  try {
+    const { id } = req.params;
+    const order = await orderService.getOrderById(id);
+    if (!order) {
+      return res.status(404).json({ error: "Order not found" });
+    }
+    res.status(200).json(order);
+  } catch (error) {
+    res
+      .status(500)
+      .json({ error: "An error occurred while retrieving the order" });
+  }
+}
+const getOrderAllDetail = async (req, res) => {
+  const { order_hash } = req.params;
 
+  console.log("Received request with order_hash:", order_hash); // Log the received hash
+
+  if (!order_hash) {
+    console.log("No order_hash provided in the request");
+    return res.status(400).json({ message: "Order hash is required" });
+  }
+
+  try {
+    const orderDetails = await orderService.getOrderAllDetail(order_hash);
+
+    if (!orderDetails) {
+      console.log("No order details found for the provided hash");
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    res.json(orderDetails);
+  } catch (error) {
+    console.error(
+      `Error fetching order details with hash ${order_hash}:`,
+      error
+    );
+    res.status(500).json({
+      message: "An error occurred while retrieving the order details",
+    });
+  }
+};
 module.exports = {
     createOrder,
     getAllOrders,
-    getOrderDetailById
+    getOrderDetailById,
+    getOrderById,
+    getOrderAllDetail,
+    getOrderByCustomerId
 
 }
