@@ -43,6 +43,44 @@ async function createOrder(req, res) {
       .json({ error: "An error occurred while creating the order" });
   }
 }
+
+//Get All Orders
+async function getAllOrders(req, res) {
+  try {
+    const { limit, sortby, completed } = req.query;
+    const orders = await orderService.getAllOrders({
+      limit,
+      sortby,
+      completed,
+    });
+    res.status(200).json(orders);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
+//Get orders by ID
+async function getOrderDetailById(req, res) {
+  try {
+    const { id } = req.params;
+    const order = await orderService.getOrderDetailById(id);
+
+    if (!order || order.length === 0) {
+      return res.status(404).json({ error: "Order not found" });
+    }
+
+    res.status(200).json(order);
+  } catch (error) {
+    console.error("Error in getOrderDetailById:", error);
+    res.status(500).json({ error: "An error occurred while retrieving the order" });
+  }
+}
+
+
+//Get Orders By ID
+
 module.exports = {
-    createOrder
+    createOrder,
+    getAllOrders,
+    getOrderDetailById
+
 }

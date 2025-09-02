@@ -212,8 +212,7 @@ async function createOrders(orderData) {
 }
 
 async function sendEmail(customerID, orderHash) {
-  console.log("CID:", customerID);
-
+ 
   if (!customerID) {
     throw new Error("bado Customer-id");
   }
@@ -223,8 +222,6 @@ async function sendEmail(customerID, orderHash) {
 
   try {
     const [response] = await pool.query(query, [customerID]);
-    console.log(response?.customer_email);
-    console.log(response);
 
     if (!response?.customer_email) {
       throw new Error("Email not found or error updating user");
@@ -258,11 +255,105 @@ async function sendEmail(customerID, orderHash) {
     console.error("Error in reset function:", error);
   }
 }
+async function getAllOrders({ limit, sortby, completed }) {
+  try {
+    let query = `
+      SELECT 
+      customer_identifier.customer_email,
+      customer_identifier.customer_phone_number, 
+      customer_info.customer_first_name,
+      customer_info.customer_last_name ,
+      customer_vehicle_info.vehicle_year,
+      customer_vehicle_info.vehicle_make, 
+      customer_vehicle_info.vehicle_model,
+      customer_vehicle_info.vehicle_tag,
+      employee_info.employee_first_name,
+      employee_info.employee_last_name, 
+      orders.*,
+      order_info.*,
+      order_services.*,
+      order_status.* 
+      FROM customer_identifier 
+      INNER JOIN customer_info ON customer_identifier.customer_id = customer_info.customer_id 
+      INNER JOIN customer_vehicle_info ON customer_info.customer_id = customer_vehicle_info.customer_id 
+      INNER JOIN orders ON orders.vehicle_id =  customer_vehicle_info.vehicle_id 
+      INNER JOIN order_status ON orders.order_id = order_status.order_id 
+      INNER JOIN employee_info ON orders.employee_id = employee_info.employee_id
+      INNER JOIN order_info ON orders.order_id = order_info.order_id
+      INNER JOIN order_services ON orders.order_id = order_services.order_id
+      ORDER BY orders.order_id DESC
+    `;
+    let queryParams = [];
 
+    if (completed !== undefined) {
+      query += " WHERE o.order_status = ?";
+      queryParams.push(completed);
+    }
+
+    if (sortby) {
+      query += ` ORDER BY ${sortby}`;
+    }
+
+    if (limit) {
+      query += " LIMIT ?";
+      queryParams.push(parseInt(limit));
+    }
+
+    const orders = await pool.query(query, queryParams);
+    return orders;
+  } catch (error) {
+    console.error("Error fetching all orders:", error);
+    throw new Error("An error occurred while retrieving the orders");
+  }
+}
+
+async function getOrderDetailById(id) {
+  try {
+    // Query to get orders
+    const orderQuery = `SELECT 
+  customer_identifier.customer_email,
+  customer_identifier.customer_phone_number, 
+  customer_info.customer_first_name,
+  customer_info.customer_last_name,
+  customer_vehicle_info.*,
+  employee_info.employee_first_name,
+  employee_info.employee_last_name, 
+  orders.order_date,
+  orders.order_hash, 
+  order_status.*,
+  common_services.*,       
+  order_services.service_id
+FROM orders
+LEFT JOIN customer_vehicle_info 
+  ON orders.vehicle_id = customer_vehicle_info.vehicle_id
+LEFT JOIN customer_info 
+  ON customer_vehicle_info.customer_id = customer_info.customer_id
+LEFT JOIN customer_identifier 
+  ON customer_info.customer_id = customer_identifier.customer_id
+LEFT JOIN employee_info 
+  ON orders.employee_id = employee_info.employee_id
+LEFT JOIN order_services 
+  ON orders.order_id = order_services.order_id
+LEFT JOIN common_services 
+  ON common_services.service_id = order_services.service_id
+LEFT JOIN order_status 
+  ON orders.order_id = order_status.order_id
+WHERE orders.order_hash = ?;
+`;
+    const orderResult = await pool.query(orderQuery, [id]);
+
+    return orderResult;
+  } catch (error) {
+    console.error(`Error fetching order with ID ${id}:`, error);
+    throw new Error("An error occurred while retrieving the order");
+  }
+}
 module.exports ={
 checkCustomerExists,
 checkVehicle,
 checkEmployeeExists,
 checkService,
 createOrders,
+getAllOrders,
+getOrderDetailById
 }
