@@ -9,5 +9,5 @@ router.get("/orders", orderController.getAllOrders);
 router.get("/order_detail/:id", orderController.getOrderDetailById);
 router.get("/order/:id" ,orderController.getOrderById)
 router.get('/order/customer/:customerid',orderController.getOrderByCustomerId)
-
+router.put("/update/:order_id", orderController.updateOrder);
 module.exports =router
