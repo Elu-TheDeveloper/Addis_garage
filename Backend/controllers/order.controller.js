@@ -148,6 +148,36 @@ async function updateOrder(req, res) {
       .json({ error: "An error occurred while updating the order" });
   }
 }
+
+
+async function searchOrder(req, res)  {
+  const { query } = req.query;
+  
+  if (!query) {
+    return res.status(400).json({ error: "Query parameter is required" });
+  }
+
+  try {
+   const searchQuery = `
+  SELECT ci.*, cinfo.customer_first_name, cinfo.customer_last_name
+  FROM customer_identifier ci
+  JOIN customer_info cinfo ON ci.customer_id = cinfo.customer_id
+  WHERE 
+    cinfo.customer_first_name LIKE ? OR 
+    cinfo.customer_last_name LIKE ? OR 
+    ci.customer_email LIKE ? OR 
+    ci.customer_phone_number LIKE ?
+`;
+   const values = [`%${query}%`, `%${query}%`, `%${query}%`, `%${query}%`];
+   const results = await pool.query(searchQuery, values);
+
+    
+    res.json(results);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
 const getOrderAllDetail = async (req, res) => {
   const { order_hash } = req.params;
 
@@ -177,6 +207,8 @@ const getOrderAllDetail = async (req, res) => {
     });
   }
 };
+
+
 module.exports = {
     createOrder,
     getAllOrders,
@@ -184,6 +216,8 @@ module.exports = {
     getOrderById,
     getOrderAllDetail,
     getOrderByCustomerId,
-    updateOrder
+     searchOrder,
+    updateOrder,
+   
 
 }

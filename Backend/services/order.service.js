@@ -612,7 +612,7 @@ async function getOrderAllDetail(orderHash) {
             WHERE orders.order_hash = ?
         `;
 
-    const queryResult = await conn.query(orderQuery, [orderHash]);
+    const queryResult = await pool.query(orderQuery, [orderHash]);
 
     console.log(" Result:", queryResult);
     console.log(typeof queryResult);
@@ -623,7 +623,6 @@ async function getOrderAllDetail(orderHash) {
 
     const order = queryResult[0];
 
-    console.log("Order:", order);
 
     // Query to get associated services
     const servicesQuery = `
@@ -635,7 +634,7 @@ async function getOrderAllDetail(orderHash) {
             INNER JOIN common_services ON order_services.service_id = common_services.service_id
             WHERE order_services.order_id = ?
         `;
-    const [servicesResult] = await conn.query(servicesQuery, [order.order_id]);
+    const [servicesResult] = await pool.query(servicesQuery, [order.order_id]);
 
     console.log("Services result:", servicesResult);
 
@@ -664,7 +663,7 @@ async function getOrderAllDetail(orderHash) {
       vehicleMake: order.vehicle_make,
       vehicleSerial: order.vehicle_serial,
       orderStatus: order.order_status,
-      services: servicesResult || [], // Attach services to order details
+      services: servicesResult || [], 
     };
 
     console.log("Processed order details:", orderDetails);
