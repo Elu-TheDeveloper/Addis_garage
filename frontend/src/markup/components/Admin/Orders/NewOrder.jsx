@@ -1,9 +1,10 @@
 import React from 'react'
-import AdminMenu from '../../../components/AdminMenu/AdminMenu'
-import CreateNewOrder from '../../../components/Admin/Orders/CreateNewOrder'
-const NewOrder = () => {
+import AdminMenu from "../../AdminMenu/AdminMenu";
+import CreateNewOrder from "./CreateNewOrder";
+
+const newOrder = () => {
   return (
-   <div>
+    <div>
         <div>
             <div className="container-fluid admin-pages">
                 <div className="row">
@@ -20,4 +21,4 @@ const NewOrder = () => {
   )
 }
 
-export default NewOrder
+export default newOrder

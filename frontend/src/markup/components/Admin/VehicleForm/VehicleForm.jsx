@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { IoCloseSharp } from "react-icons/io5";
-import { useAuth } from '../../../../Context/AuthContext';
+import { useAuth } from '../../../../context/AuthContext';
 import vehicleService from '../../../../Services/vehicle.service';
 import { useNavigate } from 'react-router-dom';
 import { BeatLoader } from "react-spinners";
@@ -24,7 +24,7 @@ const Vehicleform = ({id,v}) => {
     const [vehicle_color,setVehicleColor]=useState('')
     const [spin, setSpinner] = useState(false);
     const navigate = useNavigate()
-    // console.log(employee,employee?.employee_token)
+    console.log(employee,employee?.employee_token)
 
    const token = employee?.employee_token;
 

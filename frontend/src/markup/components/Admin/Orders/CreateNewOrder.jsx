@@ -1,103 +1,117 @@
-import React, { useState, useEffect } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
-import customerService from "../../../../services/customer.service";
-// import vehicleService from "../../../../Services/vehicle.service";
-import { useAuth } from "../../../../context/AuthContext";
-import "./CreateNewOrder.css";
-import CancelPresentationIcon from "@mui/icons-material/CancelPresentation";
-import EditCalendarOutlinedIcon from "@mui/icons-material/EditCalendarOutlined";
-import "./CreateNewOrder.css";
-import { FaEdit } from "react-icons/fa";
-// import axios from "../../../../utils/axiosConfig";
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate, Link } from 'react-router-dom';
+import customerService from '../../../../services/customer.service';
+import vehicleService from '../../../../Services/vehicle.service';
+import serviceService from '../../../../Services/service.service';
+import { useAuth } from '../../../../context/AuthContext';
+import './CreateNewOrder.css';
+import CancelPresentationIcon from '@mui/icons-material/CancelPresentation';
+import { FaEdit } from 'react-icons/fa';
 
 const api_url = import.meta.env.VITE_API_URL;
+
 function CreateNewOrder() {
   const { employee } = useAuth();
   const token = employee?.employee_token;
   const employee_id = employee?.employee_id;
-  // console.log(employee_id)
-  console.log("token:", token);
-
-  const { ID,vID} = useParams();
-  // console.log(ID,vID)
-  
+  const { ID, vID } = useParams();
+  const navigate = useNavigate();
 
   const [services, setServices] = useState([]);
   const [selectedServices, setSelectedServices] = useState([]);
-  const [serviceDescription, setServiceDescription] = useState("");
-  const [orderDescription, setOrderDescription] = useState("");
-  const [orderTotalPrice, setOrderTotalPrice] = useState("");
-  const [estimatedCompletionDate, setEstimatedCompletionDate] = useState("");
-  const [customerInfo, setCustomerInfo] = useState({});
+  const [serviceDescription, setServiceDescription] = useState('');
+  const [orderDescription, setOrderDescription] = useState('');
+  const [orderTotalPrice, setOrderTotalPrice] = useState('');
+  const [estimatedCompletionDate, setEstimatedCompletionDate] = useState('');
+  const [customerInfo, setCustomerInfo] = useState(null);
   const [vehicleInfo, setVehicleInfo] = useState(null);
-  const [showModal, setShowModal] = useState(false);
-  const [modalMessage, setModalMessage] = useState("");
-  const [errorMessage, setErrorMessage] = useState("");
-  const navigate = useNavigate();
-  const [notification, setNotification] = useState("");
+  const [errorMessage, setErrorMessage] = useState('');
+  const [notification, setNotification] = useState('');
+  const [isLoadingVehicle, setIsLoadingVehicle] = useState(true);
+  const [isLoadingServices, setIsLoadingServices] = useState(true);
+
+  console.log('Params:', { ID, vID });
+  console.log('Token:', token);
+  console.log('API URL:', api_url);
 
   const getServiceList = async () => {
     try {
+      setIsLoadingServices(true);
       const data = await serviceService.getServiceList();
-
-      console.log("create order", data);
       setServices(data.data);
-
     } catch (error) {
-      console.error("Error fetching services:", error);
+      setErrorMessage('Failed to fetch services. Please try again.');
+      console.error('Error fetching services:', error);
+    } finally {
+      setIsLoadingServices(false);
+    }
+  };
+
+  const fetchSingleCustomerData = async () => {
+    if (!token) {
+      setErrorMessage('Authentication token is missing. Please log in.');
+      navigate('/login');
+      return;
+    }
+    try {
+      const data = await customerService.singleCustomer(ID, token);
+      setCustomerInfo(data.customer);
+    } catch (error) {
+      setErrorMessage('Failed to fetch customer information.');
+      console.error('Error fetching customer:', error);
+    }
+  };
+
+  const fetchVehicleInfo = async () => {
+    if (!vID) {
+      setErrorMessage('Vehicle ID is missing. Please select a vehicle.');
+      setIsLoadingVehicle(false);
+      return;
+    }
+    if (!token) {
+      setErrorMessage('Authentication token is missing. Please log in.');
+      navigate('/login');
+      return;
+    }
+    try {
+      setIsLoadingVehicle(true);
+      const response = await vehicleService.getVehicleInfo(vID, token);
+      setVehicleInfo(response);
+    } catch (error) {
+      setErrorMessage('Failed to fetch vehicle information: ' + error.message);
+      console.error('Error fetching vehicle:', error);
+    } finally {
+      setIsLoadingVehicle(false);
     }
   };
 
   useEffect(() => {
     getServiceList();
-  }, []);
-
-  const fetchSingleCustomerData = async () => {
-    if (!token) {
-      console.error("Token is not available");
-      return;
-    }
-
-    try {
-      const data = await customerService.singleCustomer(ID, token);
-      setCustomerInfo(data.customer);
-    } catch (error) {
-      console.error("Error ", error);
-    }
-  };
-
-  useEffect(() => {
     fetchSingleCustomerData();
-  }, [ID, token]);
-
-  const fetchVehicleInfo = async () => {
-    try {
-      const response = await vehicleService.getVehicleInfo(vID,token);
-      console.log(response)
-      // console.log(response.data.result);
-      setVehicleInfo(response);
-    } catch (error) {
-      console.error("Error:", error);
-    }
-  };
-
-  useEffect(() => {
     fetchVehicleInfo();
-  }, [ID]);
+  }, [ID, vID, token]);
 
   const handleServiceSelection = (service_id) => {
-    setSelectedServices((prevServices) => {
-      if (prevServices.includes(service_id)) {
-        // If service is already selected, remove it
-        return prevServices.filter((id) => id !== service_id);
-      } else {
-        // If service is not selected, add it
-        return [...prevServices, service_id];
-      }
-    });
-    console.log(service_id);
+    setSelectedServices((prevServices) =>
+      prevServices.includes(service_id)
+        ? prevServices.filter((id) => id !== service_id)
+        : [...prevServices, service_id]
+    );
   };
-  // console.log(service.service_id)
+
+  const calculateOrderDescription = () => {
+    return selectedServices
+      .map((serviceId) => {
+        const service = services.find((s) => s.service_id === serviceId);
+        return service ? service.service_description : '';
+      })
+      .filter(Boolean)
+      .join(' ');
+  };
+
+  useEffect(() => {
+    setOrderDescription(calculateOrderDescription());
+  }, [selectedServices]);
 
   const handleOrderTotalPriceChange = (e) => {
     setOrderTotalPrice(e.target.value);
@@ -107,35 +121,24 @@ function CreateNewOrder() {
     setEstimatedCompletionDate(event.target.value);
   };
 
-  const calculateOrderDescription = () => {
-    return selectedServices
-      .map((service) => service.service_description)
-      .join(" ");
-  };
-
-  // Handle order description change
   const handleOrderDescriptionChange = (e) => {
     setOrderDescription(e.target.value);
   };
-
-  useEffect(() => {
-    setOrderDescription(calculateOrderDescription());
-  }, [selectedServices]);
 
   const handleAdditionalRequest = (e) => {
     setServiceDescription(e.target.value);
   };
 
   const handleSubmit = async () => {
-    if (!customerInfo) {
-      console.error("Customer info not loaded");
+    if (!customerInfo || !vehicleInfo) {
+      setErrorMessage('Customer or vehicle information is missing.');
       return;
     }
     const requestBody = {
-      employee_id: employee.employee_id, //
+      employee_id,
       customer_id: customerInfo.customer_id,
       vehicle_id: vehicleInfo.vehicle_id,
-      active_order: 2, // Always active order
+      active_order: 2,
       order_description: orderDescription,
       estimated_completion_date: estimatedCompletionDate,
       completion_date: null,
@@ -144,52 +147,41 @@ function CreateNewOrder() {
       order_total_price: orderTotalPrice,
       additional_request: serviceDescription,
       order_services: selectedServices.map((serviceId) => ({
-      service_id: serviceId,
-      service_completed: false,
+        service_id: serviceId,
+        service_completed: false,
       })),
     };
-    console.log(requestBody);
-
     try {
       const response = await fetch(`${api_url}/api/order`, {
-        method: "POST",
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
-          "x-access-token":token
+          'Content-Type': 'application/json',
+          'x-access-token': token,
         },
         body: JSON.stringify(requestBody),
       });
-
       if (!response.ok) {
-        throw new Error("Network response was not ok");
+        throw new Error(`HTTP error! Status: ${response.status}`);
       }
-
-      const data = await response.json();
-
-      
-      setTimeout(() => {
-        navigate("/admin/orders");
-      }, 2000); 
-      setNotification("Order successfully submitted");
-
+      setNotification('Order successfully submitted');
+      setTimeout(() => navigate('/admin/orders'), 2000);
     } catch (error) {
-       setErrorMessage("Error submitting order: " + error.message);
-      console.error("Error submitting order:", error);
+      setErrorMessage('Error submitting order: ' + error.message);
+      console.error('Error submitting order:', error);
     }
   };
-   const handleCloseModal = () => {
-     setShowModal(false);
-     navigate("/admin/orders");
-   };
+
+  const handleCloseModal = () => {
+    setNotification('');
+    navigate('/admin/orders');
+  };
 
   const handleEditCustomerClick = () => {
-    const editCustomerPath = `/admin/edit-customer/${customerInfo.customer_id}`;
-    window.location.href = editCustomerPath;
+    navigate(`/admin/edit-customer/${customerInfo?.customer_id}`);
   };
 
   const handleEditVehicleClick = () => {
-    const editVehiclePath =`/edit-vehicle/${ID}`;
-    window.location.href = editVehiclePath;
+    navigate(`/admin/edit-vehicle/${vehicleInfo?.vehicle_id}`);
   };
 
   const handleRedirectVehicle = () => {
@@ -200,86 +192,67 @@ function CreateNewOrder() {
     navigate(`/admin/create-order`);
   };
 
-
-
   const handleClickOut = (event) => {
     if (event.target.classList.contains('notification_main')) {
-      setNotification("");
-      navigate('/admin/orders')
-      console.log("Notification cleared");
+      setNotification('');
+      navigate('/admin/orders');
     }
   };
+
   const handleNotificationButtonClick = () => {
-    setNotification(""); // Hide notification
-    navigate('/admin/orders'); // Navigate to the orders page
+    setNotification('');
+    navigate('/admin/orders');
   };
 
   return (
     <div className="create-order-container">
-
-    {notification && (
-            <div onClick={handleClickOut} className="notification_main">
-              <div className="notification">
-                {notification} <br />
-                <button onClick={handleNotificationButtonClick}>Ok</button>
-              </div>
-            </div>
-          )}
-
-      <div className="contact-section pad_1">
-        <div className="contact-title mb-1">
-          <h2>Create a new order</h2>
+      {notification && (
+        <div onClick={handleClickOut} className="notification_main">
+          <div className="notification">
+            {notification} <br />
+            <button onClick={handleNotificationButtonClick}>Ok</button>
+          </div>
         </div>
-      </div>
+      )}
       {errorMessage && (
         <div className="error-message">
           <p>{errorMessage}</p>
         </div>
       )}
-
+      <div className="contact-section pad_1">
+        <div className="contact-title mb-1">
+          <h2>Create a new order</h2>
+        </div>
+      </div>
       {customerInfo ? (
         <div className="CustomerInfo">
           <div className="CustomerInfo_two">
             <div>
               <h2 className="customer_name">
-                {customerInfo.customer_first_name}{" "}
+                {customerInfo.customer_first_name}{' '}
                 <span>{customerInfo.customer_last_name}</span>
               </h2>
             </div>
             <div>
-              <CancelPresentationIcon
-                onClick={handleRedirectCustomer}
-                className="icon"
-              />
+              <CancelPresentationIcon onClick={handleRedirectCustomer} className="icon" />
             </div>
           </div>
           <p>
-            <span className="label customer_label_info">Email:</span>{" "}
+            <span className="label customer_label_info">Email:</span>{' '}
+            <span className="value customer_label_value">{customerInfo.customer_email}</span>
+          </p>
+          <p>
+            <span className="label customer_label_info">Phone Number:</span>{' '}
+            <span className="value customer_label_value">{customerInfo.customer_phone_number}</span>
+          </p>
+          <p>
+            <span className="label customer_label_info">Active Customer:</span>{' '}
             <span className="value customer_label_value">
-              {customerInfo.customer_email}
+              {customerInfo.active_customer_status ? 'Yes' : 'No'}
             </span>
           </p>
           <p>
-            <span className="label customer_label_info">Phone Number:</span>{" "}
-            <span className="value customer_label_value">
-              {customerInfo.customer_phone_number}
-            </span>
-          </p>
-          <p>
-            <span className="label customer_label_info">Active Customer:</span>{" "}
-            <span className="value  customer_label_value">
-              {customerInfo.active_customer_status ? "Yes" : "No"}
-            </span>
-          </p>
-          <p>
-            <span className="label  customer_label_info">
-              Edit customer info:
-            </span>{" "}
-            {/* <FaEdit 
-                className="icon"
-                onClick={handleEditCustomerClick}
-                size={20}
-                /> */}
+            <span className="label customer_label_info">Edit customer info:</span>{' '}
             <Link to={`/admin/edit-customer/${customerInfo.customer_id}`}>
               <FaEdit className="icon" size={20} />
             </Link>
@@ -288,72 +261,50 @@ function CreateNewOrder() {
       ) : (
         <p>Loading customer information...</p>
       )}
-
-      {vehicleInfo ? (
+      {isLoadingVehicle ? (
+        <p>Loading vehicle information...</p>
+      ) : vehicleInfo ? (
         <div className="VehicleInfo">
           <h2 className="customer_name">
             {vehicleInfo.vehicle_make}
-            <CancelPresentationIcon
-              onClick={handleRedirectVehicle}
-              className="icon"
-            />
+            <CancelPresentationIcon onClick={handleRedirectVehicle} className="icon" />
           </h2>
           <p>
-            <span className="label  customer_label_info">Vehicle color:</span>{" "}
-            <span className="value  customer_label_value">
-              {vehicleInfo.vehicle_color}
-            </span>
+            <span className="label customer_label_info">Vehicle color:</span>{' '}
+            <span className="value customer_label_value">{vehicleInfo.vehicle_color}</span>
           </p>
           <p>
-            <span className="label  customer_label_info">Vehicle tag:</span>{" "}
-            <span className="value  customer_label_value">
-              {vehicleInfo.vehicle_tag}
-            </span>
+            <span className="label customer_label_info">Vehicle tag:</span>{' '}
+            <span className="value customer_label_value">{vehicleInfo.vehicle_tag}</span>
           </p>
           <p>
-            <span className="label  customer_label_info">Vehicle Year:</span>{" "}
-            <span className="value  customer_label_value">
-              {vehicleInfo.vehicle_year}
-            </span>
+            <span className="label customer_label_info">Vehicle Year:</span>{' '}
+            <span className="value customer_label_value">{vehicleInfo.vehicle_year}</span>
           </p>
           <p>
-            <span className="label  customer_label_info">Vehicle Mileage:</span>{" "}
-            <span className="value  customer_label_value">
-              {vehicleInfo.vehicle_mileage}
-            </span>
+            <span className="label customer_label_info">Vehicle Mileage:</span>{' '}
+            <span className="value customer_label_value">{vehicleInfo.vehicle_mileage}</span>
           </p>
           <p>
-            <span className="label  customer_label_info">Vehicle serial:</span>{" "}
-            <span className="value  customer_label_value">
-              {vehicleInfo.vehicle_serial}
-            </span>
+            <span className="label customer_label_info">Vehicle serial:</span>{' '}
+            <span className="value customer_label_value">{vehicleInfo.vehicle_serial}</span>
           </p>
           <p>
-            <span className="label  customer_label_info">
-              Edit Vehicle info:
-            </span>{" "}
-            <span className="value">
-              {/* <FaEdit 
-                className="icon"
-                onClick={handleEditCustomerClick}
-                size={20}
-              /> */}
-
-              <Link to={`/admin/edit-vehicle/${vehicleInfo.vehicle_id}`}>
-                <FaEdit className="icon" size={20} />
-              </Link>
-            </span>
+            <span className="label customer_label_info">Edit Vehicle info:</span>{' '}
+            <Link to={`/admin/edit-vehicle/${vehicleInfo.vehicle_id}`}>
+              <FaEdit className="icon" size={20} />
+            </Link>
           </p>
         </div>
       ) : (
-        <p>Loading customer information...</p>
+        <p>Error loading vehicle information. Please check the vehicle ID.</p>
       )}
-
       <div className="service_list_container">
         <div className="services-list">
           <h2 className="customer_name v_font">Choose service</h2>
-
-          {services?.length > 0 ? (
+          {isLoadingServices ? (
+            <p>Loading services...</p>
+          ) : services?.length > 0 ? (
             services.map((service) => (
               <div key={service.service_id} className="service-item">
                 <div className="service-d w-100">
@@ -361,14 +312,11 @@ function CreateNewOrder() {
                     <h3 className="service_font">{service?.service_name}</h3>
                     <p>{service?.service_description}</p>
                   </div>
-
                   <div>
                     <input
                       type="checkbox"
                       checked={selectedServices.includes(service.service_id)}
-                      onChange={() =>
-                        handleServiceSelection(service.service_id)
-                      }
+                      onChange={() => handleServiceSelection(service.service_id)}
                     />
                   </div>
                 </div>
@@ -379,49 +327,42 @@ function CreateNewOrder() {
           )}
         </div>
       </div>
-
       <div className="additional-requests">
-        {/* <h2>Additional requests</h2> */}
-        <div className="contact-section pad_1" style={{ background: "#fff" }}>
+        <div className="contact-section pad_1" style={{ background: '#fff' }}>
           <div className="contact-title mb-1">
-            <h2 style={{ fontSize: "32px" }}>Additional requests</h2>
+            <h2 style={{ fontSize: '32px' }}>Additional requests</h2>
           </div>
         </div>
-
         <div className="serviceRequest">
           <input
             className="w-100"
             type="text"
-            style={{ paddingLeft: "15px" }}
+            style={{ paddingLeft: '15px' }}
             placeholder="Service Description"
             value={serviceDescription}
             onChange={handleAdditionalRequest}
           />
         </div>
-
         <div className="price">
-          <input className="w-100"
+          <input
+            className="w-100"
             type="text"
-            style={{ padding: "10px 15px" }}
+            style={{ padding: '10px 15px' }}
             placeholder="Price"
             value={orderTotalPrice}
             onChange={handleOrderTotalPriceChange}
           />
         </div>
-
-        <div>
-          <div className="price">
-            <input
-              className="w-100"
-              type="text"
-              style={{ padding: "10px 15px" }}
-              placeholder="Order Description"
-              value={orderDescription}
-              onChange={handleOrderDescriptionChange}
-            />
-          </div>
+        <div className="price">
+          <input
+            className="w-100"
+            type="text"
+            style={{ padding: '10px 15px' }}
+            placeholder="Order Description"
+            value={orderDescription}
+            onChange={handleOrderDescriptionChange}
+          />
         </div>
-
         <div className="py-2 px-3">
           <label>
             <span className="v_font">Expected Completion Date:</span>
@@ -432,7 +373,6 @@ function CreateNewOrder() {
             />
           </label>
         </div>
-
         <div className="submit mt-3 mb-5">
           <button className="submit-order" onClick={handleSubmit}>
             SUBMIT ORDER

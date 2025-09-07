@@ -36,11 +36,11 @@ export const AuthProvider = ({ children }) => {
 
   const value = {
     isLoggedin,
-    setIsLogged,   // ✅ Expose setter
+    setIsLogged, 
     isAdmin,
-    setIsAdmin,    // ✅ Expose setter
+    setIsAdmin,   
     employee,
-    setEmployee,   // ✅ Expose setter
+    setEmployee,   
   };
 
   return (
