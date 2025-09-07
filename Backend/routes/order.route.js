@@ -12,4 +12,5 @@ router.get('/order/customer/:customerid',orderController.getOrderByCustomerId)
 router.get("/order/details/:order_hash", orderController.getOrderAllDetail);
 router.get("/search-customers", orderController.searchOrder);
 router.put("/update/:order_id", orderController.updateOrder);
+
 module.exports =router
