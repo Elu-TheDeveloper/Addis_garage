@@ -13,12 +13,14 @@ import EditCustomer from './markup/components/Admin/CustomerForm/EditCustomer';
 import PrivateAuthRoute from './markup/components/Auth/PrivateAuth';
 import Unauthorized from './markup/pages/Unauthorized';
 import EditVehicle from './markup/pages/admin/Vehicle/EditVehicle';
-import CreateNewOrder from './markup/components/Admin/Orders/CreateNewOrder';
-import UpdateOrder from './markup/components/Admin/Orders/UpdateOrder';
+import CreateOrder from './markup/components/Admin/Orders/CreateOrder';
+import UpdateOrderPage from './markup/pages/admin/Orders/UpdateOrderPage';
 import SingleOrderPage from './markup/pages/admin/Orders/SingleOrderPage';
+import CreateOrderPage from "./markup/pages/admin/Orders/CreateOrderPage"
 import Header from './markup/components/Header/Header';
 import Footer from './markup/components/Footer/Footer';
 import AdminDashBoard from './markup/components/Admin/AdminDashBoard/AdminDashBoard';
+import Vehicle from "./markup/pages/admin/Vehicle/Vehicle"
 import './assets/assets_from_template/css/bootstrap.css';
 import './assets/assets_from_template/css/style.css';
 import './assets/assets_from_template/css/responsive.css';
@@ -34,34 +36,6 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/unauthorized" element={<Unauthorized />} />
         <Route
-          path="/admin/create-order"
-          element={<Navigate to="/admin/order-single" />}
-        />
-        <Route
-          path="/admin/create-order/:ID/:vID"
-          element={
-            <PrivateAuthRoute roles={[1, 2, 3]}>
-              <CreateNewOrder />
-            </PrivateAuthRoute>
-          }
-        />
-        <Route
-          path="/admin/order/:orderId"
-          element={
-            <PrivateAuthRoute roles={[1, 2, 3]}>
-              <UpdateOrder />
-            </PrivateAuthRoute>
-          }
-        />
-        <Route
-          path="/admin/order-single/:customer_id"
-          element={
-            <PrivateAuthRoute roles={[1, 2, 3]}>
-              <SingleOrderPage />
-            </PrivateAuthRoute>
-          }
-        />
-        <Route
           path="/admin/add-employee"
           element={
             <PrivateAuthRoute roles={[3]}>
@@ -76,9 +50,16 @@ function App() {
               <AdminDashBoard />
             </PrivateAuthRoute>
           }
-        />
-
+        />        
+        <Route path="/admin/create-order" element={<CreateOrderPage />} />
+        <Route path="admin/order/:orderId" element={<UpdateOrderPage />} />
+        <Route
+          path="/admin/order-single/:customer_id"
+          element={
+              <SingleOrderPage />} />
+        <Route path="/admin/order/:ID/:vID" element={<CreateOrder />} />
         <Route path="/admin/edit-vehicle/:id" element={<EditVehicle />} />
+        <Route path="/admin/customers/:id" element={<Vehicle />} />
      
         <Route
           path="/admin/employee"

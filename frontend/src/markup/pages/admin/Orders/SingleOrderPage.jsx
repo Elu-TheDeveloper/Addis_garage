@@ -8,7 +8,7 @@ const SingleOrderPage = () => {
         <div>
               <div className="container-fluid admin-pages">
                   <div className="row">
-                      <div className="c ol-md-3 admin-left-side">
+                      <div className="col-md-3 admin-left-side">
                         <AdminMenu />
                       </div>
                       <div className="col-md-9 admin-right-side px-5">
