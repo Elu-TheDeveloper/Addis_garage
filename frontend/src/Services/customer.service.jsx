@@ -25,7 +25,7 @@ const getAllCustomers = async (token, offset) => {
 
 // GET - customer orders by ID
 const getCustomerOrderbyId = async (id, token) => {
-  const response = await fetch(`${api_url}/api/corder/customer/${id}`, {
+  const response = await fetch(`${api_url}/api/order/customer/${id}`, {
     headers: { Authorization: `Bearer ${token}` },
   });
   if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);

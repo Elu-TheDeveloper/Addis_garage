@@ -1,4 +1,3 @@
-import React from 'react'
 import React from "react";
 import AdminMenu from "../../../components/AdminMenu/AdminMenu";
 import AllOrders from "../../../components/Admin/Orders/AllOrders";

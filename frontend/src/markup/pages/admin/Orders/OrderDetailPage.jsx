@@ -1,7 +1,6 @@
 import React from 'react'
-import React from 'react'
 import OrderDetail from '../../../components/Admin/Orders/OrderDetail';
-import AdminMenu from '../../../components/Admin/AdminMenu/AdminMenu';
+import AdminMenu from '../../../components/AdminMenu/AdminMenu';
 
 const OrderDetailPage = () => {
   return (

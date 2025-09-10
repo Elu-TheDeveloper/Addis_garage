@@ -1,12 +1,15 @@
 const api_url = import.meta.env.VITE_API_URL;
-
+console.log("API URL:", api_url);
+console.log("API URL raw:", JSON.stringify(api_url));
 const ordersService = {
   // Fetch all orders
   getAllOrders: async (token) => {
     try {
-      const response = await fetch(`${api_url}/api/orders`, {
+      console.log("Fetching orders from:", `${api_url}/orders`); // Debug
+      console.log("Using token:", token); // Debug
+      const response = await fetch(`${api_url}/orders`, {
         method: "GET",
-        headers: {
+       headers: {
           "x-access-token": token,
         },
       });
@@ -16,7 +19,7 @@ const ordersService = {
       }
 
       const data = await response.json();
-      console.log(data);
+      console.log("API Response:", data); // Debug
       return data;
     } catch (error) {
       console.error("Error fetching orders:", error);

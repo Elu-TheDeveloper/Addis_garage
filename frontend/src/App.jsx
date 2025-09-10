@@ -17,6 +17,8 @@ import CreateOrder from './markup/components/Admin/Orders/CreateOrder';
 import UpdateOrderPage from './markup/pages/admin/Orders/UpdateOrderPage';
 import SingleOrderPage from './markup/pages/admin/Orders/SingleOrderPage';
 import CreateOrderPage from "./markup/pages/admin/Orders/CreateOrderPage"
+import AllOrdersPage from './markup/pages/admin/Orders/AllOrdersPage';
+import OrderDetailPage from './markup/pages/admin/Orders/OrderDetailPage';
 import Header from './markup/components/Header/Header';
 import Footer from './markup/components/Footer/Footer';
 import AdminDashBoard from './markup/components/Admin/AdminDashBoard/AdminDashBoard';
@@ -59,8 +61,20 @@ function App() {
               <SingleOrderPage />} />
         <Route path="/admin/order/:ID/:vID" element={<CreateOrder />} />
         <Route path="/admin/edit-vehicle/:id" element={<EditVehicle />} />
-        <Route path="/admin/customers/:id" element={<Vehicle />} />
-     
+        <Route path="/admin/customer/:id" element={<Vehicle />} />
+     <Route
+          path="/admin/orders"
+          element={
+            <PrivateAuthRoute roles={[1, 2, 3]}>
+              <AllOrdersPage />
+            </PrivateAuthRoute>
+          }
+        />
+          <Route path="/admin/order-detail/:id" element={
+          <PrivateAuthRoute roles={[3]}>
+            <OrderDetailPage />
+          </PrivateAuthRoute>
+        } />
         <Route
           path="/admin/employee"
           element={

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import "./orderDetail.css";
 import { useParams } from "react-router-dom";
 import ordersService from "../../../../Services/order.service";
-import { useAuth } from "../../../..context/AuthContext";
+import { useAuth } from "../../../../context/AuthContext";
 
 
 const OrderDetail = () => {

@@ -7,23 +7,21 @@ import { useAuth } from '../../../../context/AuthContext';
 
 
 function AllOrders() {
-
-  // States
-  const [orders, setOrders] = useState([]);
   const { employee } = useAuth();
   const token = employee?.employee_token;
-  const location = useLocation(); 
+  const location = useLocation();
+  const [orders, setOrders] = useState([]);
 
-  // useEffect
   useEffect(() => {
     const fetchOrders = async () => {
       if (!token) {
-        console.error("Token is not available");
+        console.error("Token is not available. Redirecting to login...");
+        // Optionally redirect to login page
+        // e.g., window.location.href = "/login";
         return;
       }
       try {
         const fetchedOrders = await ordersService.getAllOrders(token);
-        console.log(fetchedOrders)
         setOrders(fetchedOrders);
       } catch (error) {
         console.error("Error fetching orders:", error);
@@ -32,6 +30,10 @@ function AllOrders() {
 
     fetchOrders();
   }, [token, location.state]);
+
+  if (!employee) {
+    return <div>Please log in to view orders.</div>;
+  } [token, location.state];
 
    // Filter to remove duplicate orders based on order_id
    const uniqueOrders = orders.reduce((acc, current) => {
