@@ -309,47 +309,124 @@ async function getAllOrders({ limit, sortby, completed }) {
   }
 }
 
-async function getOrderDetailById(id) {
-  try {
-    // Query to get orders
-    const orderQuery = `SELECT 
-  customer_identifier.customer_email,
-  customer_identifier.customer_phone_number, 
-  customer_info.customer_first_name,
-  customer_info.customer_last_name,
-  customer_vehicle_info.*,
-  employee_info.employee_first_name,
-  employee_info.employee_last_name, 
-  orders.order_date,
-  orders.order_hash, 
-  order_status.*,
-  common_services.*,       
-  order_services.service_id
-FROM orders
-LEFT JOIN customer_vehicle_info 
-  ON orders.vehicle_id = customer_vehicle_info.vehicle_id
-LEFT JOIN customer_info 
-  ON customer_vehicle_info.customer_id = customer_info.customer_id
-LEFT JOIN customer_identifier 
-  ON customer_info.customer_id = customer_identifier.customer_id
-LEFT JOIN employee_info 
-  ON orders.employee_id = employee_info.employee_id
-LEFT JOIN order_services 
-  ON orders.order_id = order_services.order_id
-LEFT JOIN common_services 
-  ON common_services.service_id = order_services.service_id
-LEFT JOIN order_status 
-  ON orders.order_id = order_status.order_id
-WHERE orders.order_hash = ?;
-`;
-    const orderResult = await pool.query(orderQuery, [id]);
+// inside order.service.js
 
-    return orderResult;
+const getOrderDetailById = async (idOrHash) => {
+  try {
+    const [rows] = await pool.query(
+      `
+      SELECT 
+        o.order_id,
+        o.order_hash,
+        o.order_date,
+        o.order_description,
+        oi.order_total_price,
+        oi.estimated_completion_date,
+        oi.completion_date,
+        oi.additional_request,
+        oi.notes_for_internal_use,
+        oi.notes_for_customer,
+        oi.additional_requests_completed,
+        c.customer_id,
+        c.customer_first_name,
+        c.customer_last_name,
+        ci.customer_email,
+        ci.customer_phone_number,
+        v.vehicle_id,
+        v.vehicle_make,
+        v.vehicle_model,
+        v.vehicle_year,
+        v.vehicle_color,
+        v.vehicle_serial,
+        v.vehicle_tag,
+        v.vehicle_mileage,
+        e.employee_id,
+        e.employee_first_name,
+        e.employee_last_name,
+        os.order_status,
+        s.service_id,
+        s.service_name,
+        s.service_description,
+        osrv.service_completed
+      FROM orders o
+      LEFT JOIN order_info oi ON o.order_id = oi.order_id
+      LEFT JOIN customer_info c ON o.customer_id = c.customer_id
+      LEFT JOIN customer_identifier ci ON ci.customer_id = c.customer_id
+      LEFT JOIN customer_vehicle_info v ON o.vehicle_id = v.vehicle_id
+      LEFT JOIN employee_info e ON o.employee_id = e.employee_id
+      LEFT JOIN order_status os ON os.order_id = o.order_id
+      LEFT JOIN order_services osrv ON osrv.order_id = o.order_id
+      LEFT JOIN common_services s ON osrv.service_id = s.service_id
+      WHERE o.order_id = ? OR o.order_hash = ?
+      `,
+      [idOrHash, idOrHash]
+    );
+
+  
+
+    // Normalize single-object case
+    const rowArray = Array.isArray(rows) ? rows : [rows];
+
+    if (rowArray.length === 0 || !rowArray[0]) {
+      console.warn(`No order found for ID/hash: ${idOrHash}`);
+      return null;
+    }
+
+    const baseOrder = rowArray[0];
+
+    const services = rowArray
+      .filter(r => r.service_id)
+      .map(r => ({
+        service_id: r.service_id,
+        service_name: r.service_name,
+        service_description: r.service_description,
+        service_completed: r.service_completed
+      }));
+
+    return {
+      orderId: baseOrder.order_id,
+      orderHash: baseOrder.order_hash,
+      orderDate: baseOrder.order_date,
+      orderDescription: baseOrder.order_description,
+      orderTotalPrice: baseOrder.order_total_price,
+      estimatedCompletionDate: baseOrder.estimated_completion_date,
+      completionDate: baseOrder.completion_date,
+      additionalRequest: baseOrder.additional_request,
+      notesForInternalUse: baseOrder.notes_for_internal_use,
+      notesForCustomer: baseOrder.notes_for_customer,
+      additionalRequestsCompleted: baseOrder.additional_requests_completed,
+      customerId: baseOrder.customer_id,
+      customerFirstName: baseOrder.customer_first_name,
+      customerLastName: baseOrder.customer_last_name,
+      customerEmail: baseOrder.customer_email,
+      customerPhoneNumber: baseOrder.customer_phone_number,
+      vehicleId: baseOrder.vehicle_id,
+      vehicleMake: baseOrder.vehicle_make,
+      vehicleModel: baseOrder.vehicle_model,
+      vehicleYear: baseOrder.vehicle_year,
+      vehicleColor: baseOrder.vehicle_color,
+      vehicleSerial: baseOrder.vehicle_serial,
+      vehicleTag: baseOrder.vehicle_tag,
+      vehicleMileage: baseOrder.vehicle_mileage,
+      employeeId: baseOrder.employee_id,
+      employeeFirstName: baseOrder.employee_first_name,
+      employeeLastName: baseOrder.employee_last_name,
+      orderStatus: baseOrder.order_status,
+      services
+    };
+
   } catch (error) {
-    console.error(`Error fetching order with ID ${id}:`, error);
+    console.error(`Error fetching order with ID/hash ${idOrHash}:`, error);
     throw new Error("An error occurred while retrieving the order");
   }
-}
+};
+
+
+
+
+
+
+
 
 async function getOrderById(id) {
   try {

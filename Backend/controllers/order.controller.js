@@ -59,17 +59,15 @@ async function getAllOrders(req, res) {
   }
 }
 //Get orders by ID
+// order.controller.js
 async function getOrderDetailById(req, res) {
   try {
     const { id } = req.params;
-const order = (await orderService.getOrderDetailById(id))[0]; // get the single order object
+    const order = await orderService.getOrderDetailById(id);
 
-if (order.order_services?.length > 0) {
-  console.log(order.order_services[0].estimated_completion_date);
-} else {
-  console.log("No services for this order yet");
-}
-
+    if (!order) {
+      return res.status(404).json({ error: "Order not found" });
+    }
 
     res.status(200).json(order);
   } catch (error) {
@@ -77,6 +75,7 @@ if (order.order_services?.length > 0) {
     res.status(500).json({ error: "An error occurred while retrieving the order" });
   }
 }
+
 
 // Get single order by CUSTOMER_ID
 async function getOrderByCustomerId(req, res) {
