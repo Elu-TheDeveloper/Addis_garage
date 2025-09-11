@@ -4,13 +4,10 @@ import { useParams } from "react-router-dom";
 import ordersService from "../../../../Services/order.service";
 import { useAuth } from "../../../../context/AuthContext";
 
-
 const OrderDetail = () => {
-  const { id } = useParams(); // Get the order ID from the URL
-  const [orderData, setOrderData] = useState(null);
-   const [loading, setLoading] = useState(true);
+  const { id } = useParams();
   const [order, setOrder] = useState(null);
-  const [orderDetails, setOrderDetails] = useState(null);
+  const [loading, setLoading] = useState(true);
   const { employee } = useAuth();
   const token = employee?.employee_token;
 
@@ -22,50 +19,28 @@ const OrderDetail = () => {
       }
       try {
         const fetchedOrder = await ordersService.getOrderDetailById(token, id);
-        setOrderData(fetchedOrder);
-        setOrder(fetchedOrder[0]);
-        
+        setOrder(fetchedOrder);
       } catch (error) {
         console.error("Error fetching order:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchOrder();
   }, [token, id]);
 
-  // console.log(order);
+  const formatMileage = (mileage) => {
+    return mileage?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  };
 
-  
-  useEffect(() => {
-    const fetchOrderDetails = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        const data = await ordersService.getOrderAllDetail(token, id);
-        setOrderDetails(data);
-        console.log(data);
-      } catch (error) {
-        setError(error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchOrderDetails();
-  }, [id]);
-
-
-const formatMileage = (mileage) => {
-  return mileage.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-};
-
-  if (!orderData) {
-    return <div>Loading...</div>;
-  }
+  if (loading) return <div>Loading...</div>;
+  if (!order) return <div>Order not found</div>;
 
   // Determine overall progress status
-  const overallStatus = orderData.every((order) => order.order_status === 1)
+  const overallStatus = order.services.every((s) => s.service_completed === 1)
     ? "Completed"
-    : orderData.some((order) => order.order_status === 0)
+    : order.services.some((s) => s.service_completed === 0)
     ? "In Progress"
     : "Received";
 
@@ -79,9 +54,10 @@ const formatMileage = (mileage) => {
         >
           <h6 className="overallstatus">{overallStatus}</h6>
         </div>
+
         <div className="sec-title style-two order_customer_name red-bottom-border">
           <h2>
-            {order.customer_first_name} {order.customer_last_name}
+            {order.customerFirstName} {order.customerLastName}
           </h2>
           <div className="text">
             This page provides the current status of the order. It will be
@@ -90,18 +66,18 @@ const formatMileage = (mileage) => {
             car is ready for the next step in processing.
           </div>
         </div>
+
         <div className="row">
           <div className="col-lg-6 service-block-one">
             <div className="inner-boxx hvr-float-shadow">
               <h5>CUSTOMER</h5>
               <h2>
-                {order.customer_first_name} {order.customer_last_name}
+                {order.customerFirstName} {order.customerLastName}
               </h2>
-              <div>Email: {order.customer_email}</div>
-              <div>Phone Number: {order.customer_phone_number}</div>
+              <div>Email: {order.customerEmail}</div>
+              <div>Phone Number: {order.customerPhoneNumber}</div>
               <div>
-                Active Customer:{" "}
-                {orderDetails?.customerActiveStatus ? "Yes" : "No"}
+                Active Customer: {order.customerActiveStatus ? "Yes" : "No"}
               </div>
             </div>
           </div>
@@ -110,36 +86,36 @@ const formatMileage = (mileage) => {
             <div className="inner-boxx hvr-float-shadow">
               <h5>CAR IN SERVICE</h5>
               <h2>
-                {order.vehicle_model} <span>({order.vehicle_color})</span>
+                {order.vehicleModel} <span>({order.vehicleColor})</span>
               </h2>
-              <div>Vehicle tag: {order.vehicle_tag}</div>
-              <div>Vehicle year: {order.vehicle_year}</div>
-              <div>Vehicle mileage: {formatMileage(order.vehicle_mileage)}</div>
+              <div>Vehicle tag: {order.vehicleTag}</div>
+              <div>Vehicle year: {order.vehicleYear}</div>
+              <div>Vehicle mileage: {formatMileage(order.vehicleMileage)}</div>
             </div>
           </div>
         </div>
 
         <div className="order_details">
-          <h5>{order.vehicle_model}</h5>
+          <h5>{order.vehicleModel}</h5>
           <h2>Requested Service</h2>
-          {orderData?.map((order, index) => (
+          {order.services.map((service, index) => (
             <div key={index} className="order_detail_items">
               <div className="requested_service">
-                <h2>{order.service_name}</h2>
-                <p>{order.service_description}</p>
+                <h2>{service.service_name}</h2>
+                <p>{service.service_description}</p>
                 <div
                   className={`status-box ${
-                    order.order_status === 0
+                    service.service_completed === 0
                       ? "status-in-progress"
-                      : order.order_status === 1
+                      : service.service_completed === 1
                       ? "status-completed"
                       : "status-received"
                   }`}
                 >
                   <h6>
-                    {order.order_status === 0
+                    {service.service_completed === 0
                       ? "In Progress"
-                      : order.order_status === 1
+                      : service.service_completed === 1
                       ? "Completed"
                       : "Received"}
                   </h6>
