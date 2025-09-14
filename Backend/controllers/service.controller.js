@@ -23,45 +23,55 @@ async function createService(req, res, next) {
   }
 }
 async function updateService(req, res) {
-    const {  service_name, service_description  } = req.body;
-    const {id}=req.params
-    const service_id =id
-   
-    if (!service_name || !service_description) {
-        return res.status(400).json({ msg: "Invalid input" });
-    }
-
-    try {
-        const result = await serviceService.updateService(service_id, service_name, service_description);
-
-        if (result.affectedRows === 0) {
-            return res.status(404).json({ msg: "Service not found" });
-        }
-
-        return res.status(200).json({ msg: "The service has been updated" });
-    } catch (error) {
-        console.error("Error updating service:", error.message);
-        return res.status(500).json({ msg: "Something went wrong" });
-    }
-}
-async function deleteService(req, res) {
   const { service_name, service_description } = req.body;
-  const {service_id}=req.params
-  
+  const { id: service_id } = req.params; // cleaner destructuring
+
+  if (!service_name || !service_description) {
+    return res.status(400).json({ status: "error", msg: "Invalid input" });
+  }
+
   try {
-      const result = await serviceService.deleteService(service_id );
-      console.log(result)
+    const result = await serviceService.updateService(
+      service_id,
+      service_name,
+      service_description
+    );
 
-      if (result.affectedRows === 0) {
-          return res.status(404).json({ msg: "Service not found" });
-      }
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ status: "error", msg: "Service not found" });
+    }
 
-      return res.status(200).json({ msg: "The service has been deleted" });
+    return res.status(200).json({
+      status: "success",
+      msg: "The service has been updated successfully",
+    });
   } catch (error) {
-      console.error("Error deleting service:", error.message);
-      return res.status(500).json({ msg: "Something went wrong" });
+    console.error("Error updating service:", error.message);
+    return res.status(500).json({
+      status: "error",
+      msg: "Something went wrong while updating service",
+    });
   }
 }
+
+async function deleteService(req, res) {
+  const { service_id } = req.params; // only need ID
+
+  try {
+    const result = await serviceService.deleteService(service_id);
+    console.log("Delete result:", result);
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ status: "error", msg: "Service not found" });
+    }
+
+    return res.status(200).json({ status: "success", msg: "The service has been deleted" });
+  } catch (error) {
+    console.error("Error deleting service:", error.message);
+    return res.status(500).json({ status: "error", msg: "Something went wrong" });
+  }
+}
+
 async function getSingleService(req, res, next) {
   try {
     const serviceId = req.params.id;
@@ -83,19 +93,24 @@ async function getAllServices(req, res) {
   try {
     const services = await serviceService.getAllServices();
 
+    console.log("DEBUG services:", Array.isArray(services), services);
+
     if (!services || services.length === 0) {
       return res.status(404).json({ error: "No services found" });
     }
 
     res.status(200).json({
       status: "success",
-      data: services,
+      data: services, // ✅ send the array
     });
   } catch (error) {
     console.error("Server error in getAllServices:", error.message);
     res.status(500).json({ error: "Failed to get all services!" });
   }
 }
+
+
+
 
 
 
