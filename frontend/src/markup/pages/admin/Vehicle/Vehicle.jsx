@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import AdminMenu from '../../../components/AdminMenu/AdminMenu';
 import Vehicleform from '../../../components/Admin/VehicleForm/VehicleForm';
 import { useParams, Link } from 'react-router-dom';
-import customerService from '../../../../services/customer.service';
+import customerService from '../../../../Services/customer.service';
 import { useAuth } from '../../../../context/AuthContext';
 import { FaEdit } from 'react-icons/fa';
 
@@ -27,7 +27,7 @@ const Vehicle = () => {
   const circleStyle = {
     width: '100px',
     height: '100px',
-    backgroundColor: 'blue',
+    backgroundColor: 'red',
     color: 'white',
     display: 'inline-block',
     borderRadius: '50%',
@@ -58,15 +58,20 @@ const Vehicle = () => {
       setCustomerInfo(customerData);
 
       // Fetch orders data
-      try {
-        const response = await customerService.getCustomerOrderbyId(id, token);
-        console.log('Orders API response:', JSON.stringify(response, null, 2));
-        setTable(response?.data || []);
-      } catch (orderError) {
-        console.error('Error fetching orders:', orderError);
-        setOrdersError(orderError.response?.status === 404 ? 'No orders found for this customer' : 'Failed to fetch orders');
-        setTable([]);
-      }
+     try {
+  const orders = await customerService.getCustomerOrderbyId(id, token);
+  console.log('Orders API response:', JSON.stringify(orders, null, 2));
+  setTable(orders); // <- keep only this line
+} catch (orderError) {
+  console.error('Error fetching orders:', orderError);
+  setOrdersError(
+    orderError.response?.status === 404
+      ? 'No orders found for this customer'
+      : 'Failed to get orders'
+  );
+  setTable([]);
+}
+
     } catch (error) {
       console.error('Error fetching customer data:', error);
       setError(error.response?.status === 404 ? 'Customer not found' : 'Failed to fetch customer information');
@@ -272,29 +277,27 @@ const Vehicle = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {table.length > 0 ? (
-                      table.map((order) => (
-                        <tr key={order.order_id || order.customer_id}>
-                          <td>{customerService.formatDate(order?.order_date) || 'N/A'}</td>
-                          <td>
-                            {`${order?.employee_first_name || ''} ${order?.employee_last_name || ''}`}
-                          </td>
-                          <td>{order?.vehicle_serial || order?.vehicle_make || 'N/A'}</td>
-                          <td>
-                            {customerService.formatDate(order?.estimated_completion_date) || 'N/A'}
-                          </td>
-                          <td>{order?.order_hash || 'N/A'}</td>
-                          <td>{order?.order_total_price || 'N/A'}</td>
-                          <td>{order?.service_name || 'N/A'}</td>
-                        </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td colSpan="7" className="text-center">
-                          {ordersError || 'No orders found.'}
-                        </td>
-                      </tr>
-                    )}
+                   {table.length > 0 ? (
+  table.map((order, index) => (
+    <tr key={order.order_id ?? order.customer_id ?? `order-${index}`}>
+      <td>{customerService.formatDate(order?.order_date) || 'N/A'}</td>
+      <td>
+        {`${order?.employee_first_name || ''} ${order?.employee_last_name || ''}`}
+      </td>
+      <td>{order?.vehicle_serial || order?.vehicle_make || 'N/A'}</td>
+      <td>{customerService.formatDate(order?.estimated_completion_date) || 'N/A'}</td>
+      <td>{order?.order_hash || 'N/A'}</td>
+      <td>{order?.order_total_price || 'N/A'}</td>
+      <td>{order?.service_name || 'N/A'}</td>
+    </tr>
+  ))
+) : (
+  <tr>
+    <td colSpan="7" className="text-center">
+      {ordersError || 'No orders found.'}
+    </td>
+  </tr>
+)}
                   </tbody>
                 </table>
               </div>

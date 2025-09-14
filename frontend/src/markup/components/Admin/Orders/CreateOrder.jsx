@@ -15,31 +15,34 @@ function CreateOrder() {
   };
 
   const handleSearch = async () => {
-    try {
-      const token = localStorage.getItem("employeeToken"); 
-      const response = await fetch.get(
-        `/api/search-customers?query=${searchTerm}`,
-        {
-          headers: { "x-access-token": token },
-        }
-      );
-      // console.log("API Response:", response.data); 
+  try {
+    const token = localStorage.getItem("employeeToken");
+    const response = await fetch(`/api/search-customers?query=${searchTerm}`, {
+      headers: { "x-access-token": token },
+    });
 
-      if (Array.isArray(response.data)) {
-        setSearchResults(response.data);
-      } else if (response.data && typeof response.data === "object") {
-        setSearchResults([response.data]);
-      } else {
-        console.error("Unexpected response format:", response.data);
-        setSearchResults([]);
-      }
-    } catch (error) {
-      console.error("Error fetching search results:", error);
-      setSearchResults([]);
-    } finally {
-      setSearchAttempted(true);
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
     }
-  };
+
+    const data = await response.json();
+
+    if (Array.isArray(data)) {
+      setSearchResults(data);
+    } else if (data && typeof data === "object") {
+      setSearchResults([data]);
+    } else {
+      console.error("Unexpected response format:", data);
+      setSearchResults([]);
+    }
+  } catch (error) {
+    console.error("Error fetching search results:", error);
+    setSearchResults([]);
+  } finally {
+    setSearchAttempted(true);
+  }
+};
+
 
   const handleAddCustomer = () => {
     console.log("Add new customer clicked");

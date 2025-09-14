@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import CreateOrder from '../../../components/Admin/Orders/CreateNewOrder';
+import CreateOrder from '../../../components/Admin/Orders/CreateOrder';
 import AdminMenu from '../../../components/AdminMenu/AdminMenu';
 const CreateOrderPage = () => {
   return (

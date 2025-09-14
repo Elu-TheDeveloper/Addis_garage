@@ -19,10 +19,12 @@ import SingleOrderPage from './markup/pages/admin/Orders/SingleOrderPage';
 import CreateOrderPage from "./markup/pages/admin/Orders/CreateOrderPage"
 import AllOrdersPage from './markup/pages/admin/Orders/AllOrdersPage';
 import OrderDetailPage from './markup/pages/admin/Orders/OrderDetailPage';
+import NewOrder from './markup/pages/admin/Orders/NewOrder';
 import Header from './markup/components/Header/Header';
 import Footer from './markup/components/Footer/Footer';
 import AdminDashBoard from './markup/components/Admin/AdminDashBoard/AdminDashBoard';
 import Vehicle from "./markup/pages/admin/Vehicle/Vehicle"
+import ServicePage from './markup/pages/admin/Service/ServicePage';
 import './assets/assets_from_template/css/bootstrap.css';
 import './assets/assets_from_template/css/style.css';
 import './assets/assets_from_template/css/responsive.css';
@@ -52,16 +54,25 @@ function App() {
               <AdminDashBoard />
             </PrivateAuthRoute>
           }
-        />        
+        />      
+
+        <Route
+          path="/admin/services"
+          element={
+            <PrivateAuthRoute roles={[3]}>
+              <ServicePage />
+            </PrivateAuthRoute>
+          }
+        />  
         <Route path="/admin/create-order" element={<CreateOrderPage />} />
         <Route path="admin/order/:orderId" element={<UpdateOrderPage />} />
         <Route
           path="/admin/order-single/:customer_id"
           element={
               <SingleOrderPage />} />
-        <Route path="/admin/order/:ID/:vID" element={<CreateOrder />} />
+        <Route path="/admin/order/:ID/:vID" element={<NewOrder />} />
         <Route path="/admin/edit-vehicle/:id" element={<EditVehicle />} />
-        <Route path="/admin/customer/:id" element={<Vehicle />} />
+        <Route path="/admin/customers/:id" element={<Vehicle />} />
      <Route
           path="/admin/orders"
           element={

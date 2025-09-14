@@ -25,12 +25,28 @@ const getAllCustomers = async (token, offset) => {
 
 // GET - customer orders by ID
 const getCustomerOrderbyId = async (id, token) => {
-  const response = await fetch(`${api_url}/api/order/customer/${id}`, {
+  const response = await fetch(`${api_url}/order/customer/${id}`, {
     headers: { Authorization: `Bearer ${token}` },
   });
-  if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
-  return response.json();
+
+  if (!response.ok) {
+    throw new Error(`Error ${response.status}: ${response.statusText}`);
+  }
+
+  const data = await response.json();
+
+  // Normalize: always return array
+  if (Array.isArray(data)) {
+    return data;
+  }
+
+  if (data && Array.isArray(data.data)) {
+    return data.data;
+  }
+
+  return []; // fallback
 };
+
 
 // PUT - update customer
 const updateCustomer = async (formData, token) => {
@@ -45,6 +61,7 @@ const updateCustomer = async (formData, token) => {
   if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
   return response.json();
 };
+
 // src/services/customerService.js (partial update)
 export async function deleteCustomer(token, id) {
   try {

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { BeatLoader } from "react-spinners";
 import { useParams, useNavigate } from "react-router-dom";
-import customerService from "../../../../services/customer.service"; // Adjust path based on structure
+import customerService from "../../../../Services/customer.service"; // Adjust path based on structure
 import { useAuth } from "../../../../context/AuthContext";
 import classes from "./edit.module.css";
 
