@@ -169,35 +169,27 @@ async function deleteVehicle(vehicle_id) {
       throw new Error("Error Deleting service: " + error.message);
     }
   }
-async function vehiclePerCustomer(ID){
-
-
+async function vehiclePerCustomer(ID) {
     try {
-        console.log("customer_id",ID)
-        let response={}
-        const query = `SELECT * FROM customer_vehicle_info WHERE customer_id = ?`
-        const result = await pool.query(query,[ID]);
+        const [rows] = await pool.query(
+            `SELECT * FROM customer_vehicle_info WHERE customer_id = ?`,
+            [ID]
+        );
 
-        if(result.length == 0){
-            return response;
-        }
-
-
-        response ={
-            
-            result
-        }
-
-        return response;
-        
-        
+        // Always return array
+        return { result: rows }; // even if rows.length === 1, it's still an array
     } catch (error) {
         console.error("Error getting Vehicle:", error);
         throw new Error("Could not get vehicle. Please try again later.");
     }
-
-    
 }
+
+
+
+
+
+
+
 async function hasServiceOrder(ID){
     try {
         console.log("vehicle_id",ID)

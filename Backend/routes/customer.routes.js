@@ -12,6 +12,7 @@ const {
 
 // Import the customer controller
 const customerController = require("../controllers/customer.controller");
+const VehicleController = require('../controllers/vehicle.controller')
 
 // Create a route to handle the customer creation request in post
 router.post(
@@ -27,7 +28,11 @@ router.get(
   customerController.getAllCustomersController
 );
 
-
+router.get(
+  '/api/customer-vehicle/:customer_id',
+  [verifyToken],
+  VehicleController.vehiclePerCustomer
+);
 
 router.get(
   "/api/customer/single/:customer_id",

@@ -79,31 +79,24 @@ async function updateVehicle(req, res) {
 }
 
 
-async function vehiclePerCustomer(req,res){
-
-    try {
-
-        const { customer_id }=req.params;
-        const ID = customer_id
-
-        const result = await vehicleService.vehiclePerCustomer(ID);
-     
-
-        if(result){
-
-            res.status(200).json(result)
-        } else{
-
-            res.status(400).json({message:'not found '})
-        }
-
-    
-    } catch (error) {
-        return res.status(500).json({
-            message:'Server Error'
-        })
+const vehiclePerCustomer = async (req, res) => {
+  const { customer_id } = req.params;
+  try {
+    const vehicleData = await vehicleService.vehiclePerCustomer(customer_id);
+    if (!vehicleData.result || vehicleData.result.length === 0) {
+      return res.status(200).json({ result: [] });
     }
-}
+    res.status(200).json(vehicleData);
+  } catch (err) {
+    console.error('Error fetching vehicles:', err);
+    res.status(500).json({ error: 'Could not fetch vehicle data' });
+  }
+};
+
+
+
+
+
 
 async function deleteVehicle(req, res) {
     const {vehicle_id}=req.params
