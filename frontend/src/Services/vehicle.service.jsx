@@ -32,44 +32,52 @@ const getVehicleInfoPerCustomer = async (customer_id, token) => {
       },
     });
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! Status: ${response.status}`);
-    }
+    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
 
     const data = await response.json();
     console.log("getVehicleInfoPerCustomer response:", data);
-    return { data };
+
+    // backend returns data.result as array
+    const vehicles = Array.isArray(data.result) ? data.result : data.result ? [data.result] : [];
+
+    return { result: vehicles }; // <-- return object with `result` array
   } catch (error) {
     console.error("Error in getVehicleInfoPerCustomer:", error);
     throw error;
   }
 };
 
-const getVehicleInfo = async (ID, token) => {
+
+
+
+const getVehicleInfo = async (vehicle_id, token) => {
   try {
-    const response = await fetch(`${api_url}/api/vehicle/${ID}`, {
+    const response = await fetch(`${api_url}/api/vehicle-single/${vehicle_id}`, {
       method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { Authorization: `Bearer ${token}` },
     });
 
     if (!response.ok) {
       throw new Error(`HTTP error! Status: ${response.status}`);
     }
+
     const data = await response.json();
     console.log("getVehicleInfo response:", data);
-    let result = data?.data?.[0];
-    return result;
+
+    // Backend returns object in data.data
+    return data?.data || null;
   } catch (error) {
     console.error("Error in getVehicleInfo:", error);
     return null;
   }
 };
 
+
+
+
 const updateVehicle = async (formData, token) => {
   try {
-    const response = await fetch(`${api_url}/api/vehicle`, {
+    const response = await fetch(`${api_url}/api/vehicle/update`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -77,18 +85,15 @@ const updateVehicle = async (formData, token) => {
       },
       body: JSON.stringify(formData),
     });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! Status: ${response.status}`);
-    }
-    const data = await response.json();
-    console.log("updateVehicle response:", data);
-    return data;
+    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+    return await response.json();
   } catch (error) {
     console.error("Error in updateVehicle:", error);
     throw error;
   }
 };
+
+
 
 const hasServiceOrder = async (ID, token) => {
   try {

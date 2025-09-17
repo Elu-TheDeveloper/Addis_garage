@@ -14,23 +14,27 @@ function CreateOrder() {
     setSearchTerm(event.target.value);
   };
 
-  const handleSearch = async () => {
+const handleSearch = async () => {
   try {
     const token = localStorage.getItem("employeeToken");
-    const response = await fetch(`/api/search-customers?query=${searchTerm}`, {
-      headers: { "x-access-token": token },
+
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/searched_customer/${encodeURIComponent(searchTerm)}`, {
+      headers: {
+        "x-access-token": token,
+      },
     });
 
     if (!response.ok) {
-      throw new Error(`HTTP error! Status: ${response.status}`);
+      const errorText = await response.text();
+      throw new Error(`HTTP error ${response.status}: ${errorText}`);
     }
 
     const data = await response.json();
 
     if (Array.isArray(data)) {
       setSearchResults(data);
-    } else if (data && typeof data === "object") {
-      setSearchResults([data]);
+    } else if (data && typeof data === "object" && Array.isArray(data.customers)) {
+      setSearchResults(data.customers);
     } else {
       console.error("Unexpected response format:", data);
       setSearchResults([]);
@@ -44,15 +48,21 @@ function CreateOrder() {
 };
 
 
+
+
   const handleAddCustomer = () => {
     console.log("Add new customer clicked");
     window.location.replace("/admin/add-customer");
   };
 
 
-  useEffect(()=>{
-    handleSearch()
-  },[searchTerm])
+  useEffect(() => {
+  if (searchTerm.trim().length > 0) {
+    handleSearch();
+  } else {
+    setSearchResults([]);
+  }
+}, [searchTerm]);
 
   return (
     <div className="container mt-4" style={{ display: "block" }}>

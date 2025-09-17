@@ -44,7 +44,7 @@ const getCustomerOrderbyId = async (id, token) => {
     return data.data;
   }
 
-  return []; // fallback
+  return [];
 };
 
 
