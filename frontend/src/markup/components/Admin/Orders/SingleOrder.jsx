@@ -48,7 +48,8 @@ setVehicles(vehiclesArray);
   }, [token, customer_id]);
 
   const handleAddVehicle = () => {
-    navigate(`/admin/customers/${customer_id}/add-vehicle`);
+    navigate(`/admin/customers/${customer_id}`);
+
   };
 
   if (loading) return <p>Loading customer information...</p>;
