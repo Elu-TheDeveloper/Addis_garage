@@ -6,21 +6,17 @@ import serviceService from "../../../../Services/service.service";
 import { useAuth } from "../../../../context/AuthContext";
 import "./CreateNewOrder.css";
 import CancelPresentationIcon from "@mui/icons-material/CancelPresentation";
-import EditCalendarOutlinedIcon from "@mui/icons-material/EditCalendarOutlined";
-import "./CreateNewOrder.css";
 import { FaEdit } from "react-icons/fa";
 
 const api_url = import.meta.env.VITE_API_URL;
+
 function CreateNewOrder() {
   const { employee } = useAuth();
   const token = employee?.employee_token;
   const employee_id = employee?.employee_id;
-  // console.log(employee_id)
-  console.log("token:", token);
 
-const { ID, vID } = useParams();
-console.log("Params:", ID, vID);
-  
+  const { ID, vID } = useParams();
+  const navigate = useNavigate();
 
   const [services, setServices] = useState([]);
   const [selectedServices, setSelectedServices] = useState([]);
@@ -28,121 +24,84 @@ console.log("Params:", ID, vID);
   const [orderDescription, setOrderDescription] = useState("");
   const [orderTotalPrice, setOrderTotalPrice] = useState("");
   const [estimatedCompletionDate, setEstimatedCompletionDate] = useState("");
-  const [customerInfo, setCustomerInfo] = useState({});
+  const [customerInfo, setCustomerInfo] = useState(null);
   const [vehicleInfo, setVehicleInfo] = useState(null);
-  const [showModal, setShowModal] = useState(false);
-  const [modalMessage, setModalMessage] = useState("");
-  const [errorMessage, setErrorMessage] = useState("");
-  const navigate = useNavigate();
   const [notification, setNotification] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
+  // Fetch services
   const getServiceList = async () => {
     try {
-   const servicesArray = await serviceService.getServiceList(); // already returns array
-    console.log("services response:", servicesArray);
-
-      setServices(servicesArray.servicesArray);
-
+      const servicesArray = await serviceService.getServiceList();
+      setServices(servicesArray || []);
     } catch (error) {
       console.error("Error fetching services:", error);
     }
   };
 
-  useEffect(() => {
-    getServiceList();
-  }, []);
-
+  // Fetch single customer
   const fetchSingleCustomerData = async () => {
-    if (!token) {
-      console.error("Token is not available");
-      return;
-    }
-
+    if (!token) return;
     try {
       const data = await customerService.singleCustomer(ID, token);
-      setCustomerInfo(data.customer);
+      setCustomerInfo(data.customer?.[0] || null);
     } catch (error) {
-      console.error("Error ", error);
+      console.error("Error fetching customer:", error);
     }
   };
 
- useEffect(() => {
-  fetchVehicleInfo();
-}, [vID, token]); // wait for token to be ready
+  // Fetch vehicle info
+  const fetchVehicleInfo = async () => {
+    if (!vID || !token) return;
+    try {
+      const vehicle = await vehicleService.getVehicleInfo(vID, token);
+      setVehicleInfo(vehicle || null);
+    } catch (error) {
+      console.error("Error fetching vehicle:", error);
+      setErrorMessage("Failed to fetch vehicle information");
+    }
+  };
 
-const fetchVehicleInfo = async () => {
-  if (!vID || !token) {
-    console.error("Vehicle ID or token is not available yet");
-    return;
-  }
-
-  try {
-    const vehicle = await vehicleService.getVehicleInfo(vID, token);
-    console.log("Vehicle info fetched:", vehicle);
-    setVehicleInfo(vehicle);
-  } catch (error) {
-    console.error("Error fetching vehicle:", error);
-    setErrorMessage("Failed to fetch vehicle information");
-  }
-};
-
-
+  useEffect(() => {
+    getServiceList();
+    fetchSingleCustomerData();
+  }, [token, ID]);
 
   useEffect(() => {
     fetchVehicleInfo();
-  }, [ID]);
+  }, [vID, token]);
 
+  // Handle service selection
   const handleServiceSelection = (service_id) => {
-    setSelectedServices((prevServices) => {
-      if (prevServices.includes(service_id)) {
-        // If service is already selected, remove it
-        return prevServices.filter((id) => id !== service_id);
-      } else {
-        // If service is not selected, add it
-        return [...prevServices, service_id];
-      }
-    });
-    console.log(service_id);
-  };
-  // console.log(service.service_id)
-
-  const handleOrderTotalPriceChange = (e) => {
-    setOrderTotalPrice(e.target.value);
+    setSelectedServices((prev) =>
+      prev.includes(service_id)
+        ? prev.filter((id) => id !== service_id)
+        : [...prev, service_id]
+    );
   };
 
-  const handleEstimatedCompletionDateChange = (event) => {
-    setEstimatedCompletionDate(event.target.value);
-  };
-
-  const calculateOrderDescription = () => {
-    return selectedServices
-      .map((service) => service.service_description)
-      .join(" ");
-  };
-
-  // Handle order description change
-  const handleOrderDescriptionChange = (e) => {
-    setOrderDescription(e.target.value);
-  };
-
+  // Handle order description auto-update
   useEffect(() => {
-    setOrderDescription(calculateOrderDescription());
-  }, [selectedServices]);
-
-  const handleAdditionalRequest = (e) => {
-    setServiceDescription(e.target.value);
-  };
+    const description = selectedServices
+      .map((serviceId) => {
+        const s = services.find((srv) => srv.service_id === serviceId);
+        return s?.service_description || "";
+      })
+      .join(" ");
+    setOrderDescription(description);
+  }, [selectedServices, services]);
 
   const handleSubmit = async () => {
-    if (!customerInfo) {
-      console.error("Customer info not loaded");
+    if (!customerInfo || !vehicleInfo) {
+      setErrorMessage("Customer or vehicle info is missing");
       return;
     }
+
     const requestBody = {
-      employee_id: employee.employee_id, //
+      employee_id,
       customer_id: customerInfo.customer_id,
       vehicle_id: vehicleInfo.vehicle_id,
-      active_order: 2, // Always active order
+      active_order: 2,
       order_description: orderDescription,
       estimated_completion_date: estimatedCompletionDate,
       completion_date: null,
@@ -150,302 +109,226 @@ const fetchVehicleInfo = async () => {
       order_status: 3,
       order_total_price: orderTotalPrice,
       additional_request: serviceDescription,
-      order_services: selectedServices.map((serviceId) => ({
-      service_id: serviceId,
-      service_completed: false,
+      order_services: selectedServices.map((id) => ({
+        service_id: id,
+        service_completed: false,
       })),
     };
-    console.log(requestBody);
 
     try {
       const response = await fetch(`${api_url}/orders`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-access-token":token
+          "x-access-token": token,
         },
         body: JSON.stringify(requestBody),
       });
 
-      if (!response.ok) {
-        throw new Error("Network response was not ok");
-      }
+      if (!response.ok) throw new Error("Network response was not ok");
 
       const data = await response.json();
-
-      
-      setTimeout(() => {
-        navigate("/admin/orders");
-      }, 2000); 
       setNotification("Order successfully submitted");
 
+      setTimeout(() => navigate("/admin/orders"), 2000);
     } catch (error) {
-       setErrorMessage("Error submitting order: " + error.message);
-      console.error("Error submitting order:", error);
+      setErrorMessage("Error submitting order: " + error.message);
+      console.error(error);
     }
   };
-   const handleCloseModal = () => {
-     setShowModal(false);
-     navigate("/admin/orders");
-   };
 
-  const handleEditCustomerClick = () => {
-    const editCustomerPath = `/admin/edit-customer/${customerInfo.customer_id}`;
-    window.location.href = editCustomerPath;
-  };
-
-  const handleEditVehicleClick = () => {
-    const editVehiclePath =`/edit-vehicle/${ID}`;
-    window.location.href = editVehiclePath;
-  };
-
-  const handleRedirectVehicle = () => {
+  // Redirect helpers
+  const handleRedirectCustomer = () => navigate("/admin/create-order");
+  const handleRedirectVehicle = () =>
     navigate(`/admin/order-single/${ID}`);
-  };
-
-  const handleRedirectCustomer = () => {
-    navigate(`/admin/create-order`);
-  };
-
-
-
-  const handleClickOut = (event) => {
-    if (event.target.classList.contains('notification_main')) {
-      setNotification("");
-      navigate('/admin/orders')
-      console.log("Notification cleared");
-    }
-  };
-  const handleNotificationButtonClick = () => {
-    setNotification(""); // Hide notification
-    navigate('/admin/orders'); // Navigate to the orders page
-  };
 
   return (
     <div className="create-order-container">
-
-    {notification && (
-            <div onClick={handleClickOut} className="notification_main">
-              <div className="notification">
-                {notification} <br />
-                <button onClick={handleNotificationButtonClick}>Ok</button>
-              </div>
-            </div>
-          )}
-
-      <div className="contact-section pad_1">
-        <div className="contact-title mb-1">
-          <h2>Create a new order</h2>
+      {notification && (
+        <div
+          onClick={() => {
+            setNotification("");
+            navigate("/admin/orders");
+          }}
+          className="notification_main"
+        >
+          <div className="notification">
+            {notification} <br />
+            <button onClick={() => navigate("/admin/orders")}>Ok</button>
+          </div>
         </div>
-      </div>
+      )}
+
       {errorMessage && (
         <div className="error-message">
           <p>{errorMessage}</p>
         </div>
       )}
 
-      {customerInfo ? (
-        <div className="CustomerInfo">
-          <div className="CustomerInfo_two">
-            <div>
-              <h2 className="customer_name">
-                {customerInfo.customer_first_name}{" "}
-                <span>{customerInfo.customer_last_name}</span>
-              </h2>
-            </div>
-            <div>
-              <CancelPresentationIcon
-                onClick={handleRedirectCustomer}
-                className="icon"
-              />
-            </div>
-          </div>
-          <p>
-            <span className="label customer_label_info">Email:</span>{" "}
-            <span className="value customer_label_value">
-              {customerInfo.customer_email}
-            </span>
-          </p>
-          <p>
-            <span className="label customer_label_info">Phone Number:</span>{" "}
-            <span className="value customer_label_value">
-              {customerInfo.customer_phone_number}
-            </span>
-          </p>
-          <p>
-            <span className="label customer_label_info">Active Customer:</span>{" "}
-            <span className="value  customer_label_value">
-              {customerInfo.active_customer_status ? "Yes" : "No"}
-            </span>
-          </p>
-          <p>
-            <span className="label  customer_label_info">
-              Edit customer info:
-            </span>{" "}
-            {/* <FaEdit 
-                className="icon"
-                onClick={handleEditCustomerClick}
-                size={20}
-                /> */}
-            <Link to={`/admin/edit-customer/${customerInfo.customer_id}`}>
-              <FaEdit className="icon" size={20} />
-            </Link>
-          </p>
-        </div>
-      ) : (
-        <p>Loading customer information...</p>
-      )}
+   {/* Customer Info */}
+{customerInfo ? (
+  <div className="CustomerInfo p-4 bg-white shadow rounded-lg mb-6">
+    <div className="CustomerInfo_two flex justify-between items-center mb-4">
+      <h2 className="customer_name text-xl font-bold text-gray-800">
+        {customerInfo.customer_first_name}{" "}
+        <span>{customerInfo.customer_last_name}</span>
+      </h2>
+      <CancelPresentationIcon
+        onClick={handleRedirectCustomer}
+        className="icon cursor-pointer text-red-500"
+      />
+    </div>
+    <p>
+      <span className="font-semibold">Email:</span>{" "}
+      <span>{customerInfo.customer_email}</span>
+    </p>
+    <p>
+      <span className="font-semibold">Phone Number:</span>{" "}
+      <span>{customerInfo.customer_phone_number}</span>
+    </p>
+    <p>
+      <span className="font-semibold">Active Customer:</span>{" "}
+      <span>
+        {customerInfo.active_customer_status ? "Yes" : "No"}
+      </span>
+    </p>
+    <p>
+      <span className="font-semibold">Edit customer info:</span>{" "}
+      <Link to={`/admin/edit-customer/${customerInfo.customer_id}`}>
+        <FaEdit className="inline ml-2 text-blue-600 cursor-pointer" size={20} />
+      </Link>
+    </p>
+  </div>
+) : (
+  <p>Loading customer information...</p>
+)}
 
-      {vehicleInfo ? (
-        <div className="VehicleInfo">
-          <h2 className="customer_name">
-            {vehicleInfo.vehicle_make}
-            <CancelPresentationIcon
-              onClick={handleRedirectVehicle}
-              className="icon"
-            />
-          </h2>
-          <p>
-            <span className="label  customer_label_info">Vehicle color:</span>{" "}
-            <span className="value  customer_label_value">
-              {vehicleInfo.vehicle_color}
-            </span>
-          </p>
-          <p>
-            <span className="label  customer_label_info">Vehicle tag:</span>{" "}
-            <span className="value  customer_label_value">
-              {vehicleInfo.vehicle_tag}
-            </span>
-          </p>
-          <p>
-            <span className="label  customer_label_info">Vehicle Year:</span>{" "}
-            <span className="value  customer_label_value">
-              {vehicleInfo.vehicle_year}
-            </span>
-          </p>
-          <p>
-            <span className="label  customer_label_info">Vehicle Mileage:</span>{" "}
-            <span className="value  customer_label_value">
-              {vehicleInfo.vehicle_mileage}
-            </span>
-          </p>
-          <p>
-            <span className="label  customer_label_info">Vehicle serial:</span>{" "}
-            <span className="value  customer_label_value">
-              {vehicleInfo.vehicle_serial}
-            </span>
-          </p>
-          <p>
-            <span className="label  customer_label_info">
-              Edit Vehicle info:
-            </span>{" "}
-            <span className="value">
-              {/* <FaEdit 
-                className="icon"
-                onClick={handleEditCustomerClick}
-                size={20}
-              /> */}
+   {/* Vehicle Info */}
+{/* Vehicle Info */}
+{/* Vehicle Info */}
+{vehicleInfo ? (
+  <div className="VehicleInfo p-4 bg-white shadow rounded-lg mb-6">
+    <div className="VehicleInfo_header flex justify-between items-center mb-4">
+      <h2 className="vehicle_name text-xl font-bold text-gray-800">
+        {vehicleInfo.vehicle_make}{" "}
+        <span>{vehicleInfo.vehicle_model || ""}</span>
+      </h2>
+      <CancelPresentationIcon
+        onClick={handleRedirectVehicle}
+        className="cancel-icon"
+      />
+    </div>
 
-              <Link to={`/admin/edit-vehicle/${vehicleInfo.vehicle_id}`}>
-                <FaEdit className="icon" size={20} />
-              </Link>
-            </span>
-          </p>
-        </div>
-      ) : (
-        <p>Loading customer information...</p>
-      )}
+    <p>
+      <span className="label">Vehicle Color:</span>
+      <span className="value">{vehicleInfo.vehicle_color || "-"}</span>
+    </p>
+    <p>
+      <span className="label">Vehicle Tag:</span>
+      <span className="value">{vehicleInfo.vehicle_tag || "-"}</span>
+    </p>
+    <p>
+      <span className="label">Vehicle Year:</span>
+      <span className="value">{vehicleInfo.vehicle_year || "-"}</span>
+    </p>
+    <p>
+      <span className="label">Vehicle Mileage:</span>
+      <span className="value">{vehicleInfo.vehicle_mileage || "-"}</span>
+    </p>
+    <p>
+      <span className="label">Vehicle Serial:</span>
+      <span className="value">{vehicleInfo.vehicle_serial || "-"}</span>
+    </p>
 
+    {/* Edit button separate from cancel icon */}
+    <div className="mt-4">
+      <Link
+        to={`/admin/edit-vehicle/${vehicleInfo.vehicle_id}`}
+        className="edit-btn"
+      >
+        Edit Vehicle
+      </Link>
+    </div>
+  </div>
+) : (
+  <p>Loading vehicle information...</p>
+)}
+
+
+
+
+      {/* Services Selection */}
       <div className="service_list_container">
-        <div className="services-list">
-          <h2 className="customer_name v_font">Choose service</h2>
-
-          {services?.length > 0 ? (
-            services.map((service) => (
-              <div key={service.service_id} className="service-item">
-                <div className="service-d w-100">
-                  <div>
-                    <h3 className="service_font">{service?.service_name}</h3>
-                    <p>{service?.service_description}</p>
-                  </div>
-
-                  <div>
-                    <input
-                      type="checkbox"
-                      checked={selectedServices.includes(service.service_id)}
-                      onChange={() =>
-                        handleServiceSelection(service.service_id)
-                      }
-                    />
-                  </div>
+        <h2 className="customer_name v_font">Choose service</h2>
+        {services.length > 0 ? (
+          services.map((service) => (
+            <div key={service.service_id} className="service-item">
+              <div className="service-d w-100">
+                <div>
+                  <h3 className="service_font">{service.service_name}</h3>
+                  <p>{service.service_description}</p>
+                </div>
+                <div>
+                  <input
+                    type="checkbox"
+                    checked={selectedServices.includes(service.service_id)}
+                    onChange={() => handleServiceSelection(service.service_id)}
+                  />
                 </div>
               </div>
-            ))
-          ) : (
-            <p>No services available</p>
-          )}
-        </div>
+            </div>
+          ))
+        ) : (
+          <p>No services available</p>
+        )}
       </div>
 
-      <div className="additional-requests">
-        {/* <h2>Additional requests</h2> */}
-        <div className="contact-section pad_1" style={{ background: "#fff" }}>
-          <div className="contact-title mb-1">
-            <h2 style={{ fontSize: "32px" }}>Additional requests</h2>
-          </div>
-        </div>
+      {/* Additional Requests */}
+    {/* Additional Requests */}
+<div className="additional-requests p-4 bg-gray-50 rounded-lg mt-6">
+  <h2 style={{ fontSize: "32px", marginBottom: "16px" }}>
+    Additional requests
+  </h2>
 
-        <div className="serviceRequest">
-          <input
-            className="w-100"
-            type="text"
-            style={{ paddingLeft: "15px" }}
-            placeholder="Service Description"
-            value={serviceDescription}
-            onChange={handleAdditionalRequest}
-          />
-        </div>
+  <input
+    type="text"
+    className="w-100 mb-3 p-2 border rounded"
+    placeholder="Service Description"
+    value={serviceDescription}
+    onChange={(e) => setServiceDescription(e.target.value)}
+  />
 
-        <div className="price">
-          <input className="w-100"
-            type="text"
-            style={{ padding: "10px 15px" }}
-            placeholder="Price"
-            value={orderTotalPrice}
-            onChange={handleOrderTotalPriceChange}
-          />
-        </div>
+  <input
+    type="text"
+    className="w-100 mb-3 p-2 border rounded"
+    placeholder="Price"
+    value={orderTotalPrice}
+    onChange={(e) => setOrderTotalPrice(e.target.value)}
+  />
 
-        <div>
-          <div className="price">
-            <input
-              className="w-100"
-              type="text"
-              style={{ padding: "10px 15px" }}
-              placeholder="Order Description"
-              value={orderDescription}
-              onChange={handleOrderDescriptionChange}
-            />
-          </div>
-        </div>
+  <input
+    type="text"
+    className="w-100 mb-3 p-2 border rounded"
+    placeholder="Order Description"
+    value={orderDescription}
+    onChange={(e) => setOrderDescription(e.target.value)}
+  />
 
-        <div className="py-2 px-3">
-          <label>
-            <span className="v_font">Expected Completion Date:</span>
-            <input
-              type="datetime-local"
-              value={estimatedCompletionDate}
-              onChange={handleEstimatedCompletionDateChange}
-            />
-          </label>
-        </div>
+  <label className="block mb-3">
+    Expected Completion Date:
+    <input
+      type="datetime-local"
+      className="ml-2 p-2 border rounded"
+      value={estimatedCompletionDate}
+      onChange={(e) => setEstimatedCompletionDate(e.target.value)}
+    />
+  </label>
 
-        <div className="submit mt-3 mb-5">
-          <button className="submit-order" onClick={handleSubmit}>
-            SUBMIT ORDER
-          </button>
-        </div>
-      </div>
+  <button className="submit-order mt-4 mb-5 px-6 py-2 rounded">
+    SUBMIT ORDER
+  </button>
+</div>
+
     </div>
   );
 }

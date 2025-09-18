@@ -21,31 +21,125 @@
   font-weight: 300;
 }
 
+/* General container styling */
+/* -------------------- Modern Card Style -------------------- */
 .CustomerInfo,
-.VehicleInfo,
-.servicesSection,
-.additional-requests {
+.VehicleInfo {
+  background: linear-gradient(145deg, #ffffff, #f1f4f9);
+  padding: 2rem;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
   margin-bottom: 2rem;
-  padding: 1rem;
-  background-color: #fff;
-  /* border-radius: 4px; */
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-  text-align: left;
 }
 
+.CustomerInfo:hover,
+.VehicleInfo:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+}
+
+/* Section headers */
 .CustomerInfo h2,
-.VehicleInfo h2,
-.additional-requests h2 {
-  font-size: 20px;
+.VehicleInfo h2 {
+  font-size: 26px;
+  font-weight: 700;
+  color: #1a1a2e;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
 }
-.additional-requests h2 {
-  margin-left: 10px;
-}
+
+/* Labels & values */
 .CustomerInfo p,
 .VehicleInfo p {
-  padding-bottom: 0%;
-  font-size: 10px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 18px;
+  margin-bottom: 12px;
 }
+
+.CustomerInfo .label,
+.VehicleInfo .label {
+  font-weight: 600;
+  color: #0f3fba;
+  min-width: 160px;
+}
+
+.CustomerInfo .value,
+.VehicleInfo .value {
+  font-weight: 500;
+  color: #333;
+  text-align: right;
+}
+
+/* Edit button with icon */
+.CustomerInfo .edit-btn,
+.VehicleInfo .edit-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(90deg, #ff4d4d, #ff1a1a);
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.CustomerInfo .edit-btn:hover,
+.VehicleInfo .edit-btn:hover {
+  background: linear-gradient(90deg, #ff1a1a, #cc0000);
+  transform: scale(1.05);
+}
+
+/* Icons inside cards */
+.CustomerInfo .icon,
+.VehicleInfo .icon {
+  font-size: 20px;
+  color: #fff;
+}
+
+/* Optional: subtle dividers between info rows */
+.CustomerInfo p:not(:last-child),
+.VehicleInfo p:not(:last-child) {
+  border-bottom: 1px solid rgba(15, 63, 186, 0.1);
+  padding-bottom: 8px;
+}
+
+/* Optional: make cancel icons modern */
+.CustomerInfo .cancel-icon,
+.VehicleInfo .cancel-icon {
+  font-size: 24px;
+  color: #ff4d4d;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.CustomerInfo .cancel-icon:hover,
+.VehicleInfo .cancel-icon:hover {
+  transform: scale(1.2);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .CustomerInfo p,
+  .VehicleInfo p {
+    flex-direction: column;
+    align-items: flex-start;
+    font-size: 16px;
+  }
+  .CustomerInfo .label,
+  .VehicleInfo .label {
+    min-width: auto;
+    margin-bottom: 4px;
+  }
+}
+
 
 .serviceRequest {
   display: block;
