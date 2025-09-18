@@ -66,20 +66,27 @@ console.log("Params:", ID, vID);
     }
   };
 
-  useEffect(() => {
-    fetchSingleCustomerData();
-  }, [ID, token]);
+ useEffect(() => {
+  fetchVehicleInfo();
+}, [vID, token]); // wait for token to be ready
 
-  const fetchVehicleInfo = async () => {
-    try {
-      const response = await vehicleService.getVehicleInfo(vID,token);
-      console.log(response)
-      console.log(response.data.result);
-      setVehicleInfo(response);
-    } catch (error) {
-      console.error("Error:", error);
-    }
-  };
+const fetchVehicleInfo = async () => {
+  if (!vID || !token) {
+    console.error("Vehicle ID or token is not available yet");
+    return;
+  }
+
+  try {
+    const vehicle = await vehicleService.getVehicleInfo(vID, token);
+    console.log("Vehicle info fetched:", vehicle);
+    setVehicleInfo(vehicle);
+  } catch (error) {
+    console.error("Error fetching vehicle:", error);
+    setErrorMessage("Failed to fetch vehicle information");
+  }
+};
+
+
 
   useEffect(() => {
     fetchVehicleInfo();
