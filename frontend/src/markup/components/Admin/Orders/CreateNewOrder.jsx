@@ -171,12 +171,9 @@ function CreateNewOrder() {
     <div className="CustomerInfo_two flex justify-between items-center mb-4">
       <h2 className="customer_name text-xl font-bold text-gray-800">
         {customerInfo.customer_first_name}{" "}
+         
         <span>{customerInfo.customer_last_name}</span>
       </h2>
-      <CancelPresentationIcon
-        onClick={handleRedirectCustomer}
-        className="icon cursor-pointer text-red-500"
-      />
     </div>
     <p>
       <span className="font-semibold">Email:</span>{" "}
@@ -324,7 +321,7 @@ function CreateNewOrder() {
     />
   </label>
 
-  <button className="submit-order mt-4 mb-5 px-6 py-2 rounded">
+  <button className="submit-order mt-4 mb-5 px-6 py-2 rounded" onClick={handleSubmit}>
     SUBMIT ORDER
   </button>
 </div>
