@@ -1,19 +1,20 @@
 // App.jsx
 import React from 'react';
 import { Route, Routes, Navigate } from 'react-router-dom';
-import Home from './markup/pages/Home';
+import Home from './markup/pages/Home/Home';
 import Login from './markup/pages/Login';
 import Addemployee from './markup/pages/admin/Employee/Addemployee';
 import Employees from './markup/pages/admin/Employee/Employees';
 import EditEmployee from './markup/pages/admin/Employee/EditEmployee';
 import EmployeeProfile from './markup/pages/admin/Employee/EmployeeProfile';
+import About from "./markup/components/About/About"
 import Customer from './markup/pages/admin/Customers/Customers';
 import CustomerForm from './markup/pages/admin/Customers/CustomerForm';
 import EditCustomer from './markup/components/Admin/CustomerForm/EditCustomer';
 import PrivateAuthRoute from './markup/components/Auth/PrivateAuth';
 import Unauthorized from './markup/pages/Unauthorized';
 import EditVehicle from './markup/pages/admin/Vehicle/EditVehicle';
-import CreateOrder from './markup/components/Admin/Orders/CreateOrder';
+import Contact from "./markup/components/Email/Email"
 import UpdateOrderPage from './markup/pages/admin/Orders/UpdateOrderPage';
 import SingleOrderPage from './markup/pages/admin/Orders/SingleOrderPage';
 import CreateOrderPage from "./markup/pages/admin/Orders/CreateOrderPage"
@@ -39,6 +40,8 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/unauthorized" element={<Unauthorized />} />
+         <Route path="/About" element={<About />} />
+          <Route path="/contact" element={<Contact />} />
         <Route
           path="/admin/add-employee"
           element={

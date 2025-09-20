@@ -105,25 +105,25 @@ function CreateNewOrder() {
       order_description: orderDescription,
       estimated_completion_date: estimatedCompletionDate,
       completion_date: null,
-      order_completed: 0,
-      order_status: 3,
+      order_completed: 1,
+      order_status: "",
       order_total_price: orderTotalPrice,
       additional_request: serviceDescription,
       order_services: selectedServices.map((id) => ({
-        service_id: id,
-        service_completed: false,
+      service_id: id,
+      service_completed: false,
       })),
     };
 
     try {
-      const response = await fetch(`${api_url}/orders`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-access-token": token,
-        },
-        body: JSON.stringify(requestBody),
-      });
+      const response = await fetch(`${api_url}/order`, {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${token}`,  
+  },
+  body: JSON.stringify(requestBody),
+});
 
       if (!response.ok) throw new Error("Network response was not ok");
 
@@ -250,9 +250,6 @@ function CreateNewOrder() {
 ) : (
   <p>Loading vehicle information...</p>
 )}
-
-
-
 
       {/* Services Selection */}
       <div className="service_list_container">
