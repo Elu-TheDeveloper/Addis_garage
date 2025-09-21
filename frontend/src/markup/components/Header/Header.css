@@ -1,0 +1,37 @@
+/* Hamburger icon */
+.hamburger {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: 30px;
+  cursor: pointer;
+}
+
+.hamburger .line {
+  height: 3px;
+  background-color: #000;
+  border-radius: 2px;
+}
+
+/* Mobile menu */
+.mobile-menu {
+  list-style: none;
+  background: #fff;
+  padding: 10px;
+  position: absolute;
+  top: 60px; /* adjust depending on header height */
+  right: 20px;
+  width: 200px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  z-index: 1000;
+}
+
+.mobile-menu li {
+  padding: 10px 0;
+}
+
+.mobile-menu li a {
+  color: #000;
+  text-decoration: none;
+}
