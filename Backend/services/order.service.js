@@ -243,7 +243,7 @@ async function sendEmail(customerID, orderHash) {
       from: process.env.AdminEmail,
       to: email,
       subject: "Check Your Car Service Status Anytime!",
-      text: `Update on Your Car Service: View Status via This Link:-  http://localhost:5173/order-status/${orderHash}`,
+      text: `Update on Your Car Service: View Status via This Link:-  http://192.168.1.4:5173/order-status/${orderHash}`,
     };
 
     transporter.sendMail(mailOptions, (error, info) => {
