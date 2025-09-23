@@ -35,3 +35,47 @@
   color: #000;
   text-decoration: none;
 }
+/* Hamburger wrapper */
+.hamburger-icon {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: 30px;
+  cursor: pointer;
+}
+
+/* Hamburger lines */
+.hamburger-line {
+  height: 3px;
+  width: 100%;
+  background-color: #000;
+  border-radius: 2px;
+}
+
+/* Hide Bootstrap dropdown caret */
+.hamburger-toggle::after {
+  display: none !important;
+}
+
+/* Dropdown menu styling */
+.dropdown-menu {
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  border-radius: 8px;
+  margin-top: 10px;
+}
+
+.dropdown-menu .dropdown-item {
+  padding: 10px 15px;
+  font-size: 16px;
+}
+
+.dropdown-menu .dropdown-item:hover {
+  background: #f0f0f0;
+}
+
+/* Align avatar */
+.employee_profile .avatar {
+  margin-left: 15px;
+}
