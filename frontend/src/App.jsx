@@ -2,7 +2,7 @@
 import React from 'react';
 import { Route, Routes, Navigate } from 'react-router-dom';
 import Home from './markup/pages/Home/Home';
-import Login from './markup/pages/Login';
+import Login from './markup/pages/Login/Login';
 import Addemployee from './markup/pages/admin/Employee/Addemployee';
 import Employees from './markup/pages/admin/Employee/Employees';
 import EditEmployee from './markup/pages/admin/Employee/EditEmployee';
@@ -12,7 +12,7 @@ import Customer from './markup/pages/admin/Customers/Customers';
 import CustomerForm from './markup/pages/admin/Customers/CustomerForm';
 import EditCustomer from './markup/components/Admin/CustomerForm/EditCustomer';
 import PrivateAuthRoute from './markup/components/Auth/PrivateAuth';
-import Unauthorized from './markup/pages/Unauthorized';
+import Unauthorized from './markup/pages/Unauthorized/Unauthorized';
 import EditVehicle from './markup/pages/admin/Vehicle/EditVehicle';
 import Contact from "./markup/components/Email/Email"
 import UpdateOrderPage from './markup/pages/admin/Orders/UpdateOrderPage';
