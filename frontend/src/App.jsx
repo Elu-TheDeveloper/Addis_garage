@@ -1,6 +1,6 @@
 // App.jsx
 import React from 'react';
-import { Route, Routes, Navigate } from 'react-router-dom';
+import { Route, Routes } from 'react-router-dom';
 import Home from './markup/pages/Home/Home';
 import Login from './markup/pages/Login/Login';
 import Addemployee from './markup/pages/admin/Employee/Addemployee';
@@ -60,7 +60,7 @@ function App() {
         />      
 
         <Route
-          path="/admin/services"
+          path="/services"
           element={
             <PrivateAuthRoute roles={[3]}>
               <ServicePage />

@@ -6,7 +6,7 @@ const Email = () => {
   const [messageType, setMessageType] = useState(""); 
   const form = useRef(null);
 
-  // ✅ Initialize EmailJS once when component mounts
+
   useEffect(() => {
     emailjs.init("public_i2W9erpJHlDsKxaT3"); // replace with your real PUBLIC KEY from EmailJS dashboard
   }, []);
@@ -59,7 +59,7 @@ const Email = () => {
                 <form ref={form} onSubmit={sendEmail}>
                   <div className="row clearfix">
                     <div className="form-group col-md-12">
-                      {/* ✅ must match EmailJS template variables */}
+                 
                       <input type="text" name="from_name" placeholder="Name" required />
                     </div>
 
