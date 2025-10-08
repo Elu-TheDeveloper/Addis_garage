@@ -54,7 +54,7 @@ const LoginForm = () => {
           if (role === 3) {
             window.location.replace("/admin"); // Admin user
           } else {
-            window.location.replace("admin/add-customer"); // Regular employee
+            window.location.replace("admin/add-customer");
           }
         } else {
           window.location.reload();

@@ -192,12 +192,12 @@ const handleToggle = async () => {
                             >
                               <i className="fas fa-edit" title="Edit"></i>
                             </Link>
-                            {/* <Link
+                            <Link
                               to={`/admin/employee-profile/${employee.employee_id}`}
                               state={{ employee }}
                             >
                               <i className="fas fa-eye" title="View"></i>
-                            </Link> */}
+                            </Link>
                             <Link
                               onClick={() => handleShowDeleteModal(employee)}
                             >
