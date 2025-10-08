@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { BeatLoader } from "react-spinners";
-import customerService from "../../../../services/customer.service";
+import customerService from "../../../../Services/customer.service";
 import { useAuth } from "../../../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 

@@ -3,7 +3,7 @@ import { useAuth } from "../../../../context/AuthContext";
 import Avatar from "react-avatar";
 import { useParams, useNavigate } from "react-router-dom";
 import { Bar } from "react-chartjs-2";
-import employeeService from "../../../../services/employee.service";
+import employeeService from "../../../../services/employee.service"
 import "./EmployeeProfile.css";
 import {
   Chart as ChartJS,

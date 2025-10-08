@@ -69,10 +69,9 @@ const handleToggle = async () => {
   setShowActiveEmployees((prev) => {
     const newShowActive = !prev;
     const showInactive = !newShowActive;
-    // console.log('Before toggle - showInactive:', showInactive, 'showActiveEmployees:', prev);
     setCurrentPage(1);
-    // console.log('After toggle - showInactive:', showInactive, 'newShowActive:', newShowActive);
-    getAllEmployees(showInactive); // Remove async/await to avoid race condition
+   
+    getAllEmployees(showInactive); 
     return newShowActive;
   });
 };
@@ -193,12 +192,12 @@ const handleToggle = async () => {
                             >
                               <i className="fas fa-edit" title="Edit"></i>
                             </Link>
-                            <Link
+                            {/* <Link
                               to={`/admin/employee-profile/${employee.employee_id}`}
                               state={{ employee }}
                             >
                               <i className="fas fa-eye" title="View"></i>
-                            </Link>
+                            </Link> */}
                             <Link
                               onClick={() => handleShowDeleteModal(employee)}
                             >

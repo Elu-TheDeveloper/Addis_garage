@@ -102,7 +102,7 @@ const Header = () => {
                         <Dropdown.Item as={Link} to="/about">
                           About Us
                         </Dropdown.Item>
-                        <Dropdown.Item as={Link} to="/services">
+                        <Dropdown.Item as={Link} to="/admin/services">
                           Services
                         </Dropdown.Item>
                         <Dropdown.Item as={Link} to="/contact">
@@ -131,7 +131,7 @@ const Header = () => {
                             <Link to="/about">About Us</Link>
                           </li>
                           <li>
-                            <Link to="/services">Services</Link>
+                            <Link to="/admin/services">Services</Link>
                           </li>
                           <li>
                             <Link to="/contact">Contact Us</Link>

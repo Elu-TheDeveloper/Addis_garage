@@ -60,7 +60,7 @@ function App() {
         />      
 
         <Route
-          path="/services"
+          path="admin/services"
           element={
             <PrivateAuthRoute roles={[3]}>
               <ServicePage />
